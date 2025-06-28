@@ -1,0 +1,238 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# PayloadCMS Plugin Development Rules
+
+## Project Overview
+This is a **PayloadCMS Cookie Consent Plugin** built with modern web technologies. Follow these rules to maintain consistency, quality, and best practices across the codebase.
+
+## Core Technologies & Stack
+- **Runtime**: Node.js 18.20.2+ or 20.9.0+
+- **Framework**: Next.js 15.3.0 (App Router)
+- **CMS**: PayloadCMS 3.37.0+
+- **Frontend**: React 19.1.0
+- **Language**: TypeScript 5.7.3
+- **Package Manager**: pnpm 9+
+- **Styling**: SCSS/CSS Modules
+- **Database**: MongoDB (with Mongoose adapter)
+- **Testing**: Vitest + Playwright (E2E)
+
+## File Organization & Structure
+
+### Plugin Structure
+```
+src/
+├── components/          # React components (RSC + Client)
+├── endpoints/          # Custom API endpoints
+├── exports/           # Plugin entry points
+├── types/             # TypeScript type definitions
+├── utils/             # Utility functions
+├── hooks/             # Custom React hooks
+└── styles/            # SCSS/CSS files
+```
+
+### Development Structure
+```
+dev/
+├── app/              # Next.js app directory
+├── helpers/          # Test utilities
+├── payload.config.ts # PayloadCMS configuration
+└── *.spec.ts        # Test files
+```
+
+## Code Style & Conventions
+
+### TypeScript
+- Use strict TypeScript with explicit types
+- Prefer `interface` over `type` for object shapes
+- Use `const` for immutable values
+- Implement proper generic constraints
+- Export types from `payload` when available
+
+### React Components
+- Use functional components with hooks
+- Implement Server Components (RSC) by default
+- Add 'use client' directive only when necessary
+- Use proper prop types and interfaces
+- Implement proper error boundaries
+
+### PayloadCMS Specific
+- Follow PayloadCMS 3.x plugin architecture
+- Use proper collection field types
+- Implement proper plugin configuration types
+- Handle plugin disabled state gracefully
+- Maintain database schema consistency
+
+### File Naming
+- Use kebab-case for files and directories
+- Use PascalCase for React components
+- Use camelCase for functions and variables
+- Add `.module.css` suffix for CSS modules
+- Use `.spec.ts` for test files
+
+## Best Practices
+
+### Plugin Development
+1. **Configuration**: Always provide typed configuration options
+2. **Extensibility**: Allow users to override default behaviors
+3. **Performance**: Lazy load components when possible
+4. **Compatibility**: Maintain backward compatibility
+5. **Testing**: Write comprehensive tests for all features
+
+### PayloadCMS Integration
+1. **Collections**: Extend existing collections thoughtfully
+2. **Fields**: Add fields to sidebars when appropriate
+3. **Hooks**: Use PayloadCMS lifecycle hooks properly
+4. **Admin Components**: Implement both RSC and client components
+5. **Endpoints**: Follow RESTful conventions
+
+### Next.js App Router
+1. **Routing**: Use App Router conventions
+2. **Layouts**: Implement proper layout hierarchy
+3. **Metadata**: Add proper SEO metadata
+4. **Performance**: Optimize for Core Web Vitals
+5. **Accessibility**: Follow WCAG guidelines
+
+### Error Handling
+1. **Graceful Degradation**: Handle missing dependencies
+2. **User Feedback**: Provide clear error messages
+3. **Logging**: Implement proper error logging
+4. **Recovery**: Allow users to recover from errors
+5. **Validation**: Validate all inputs and configurations
+
+## Code Quality Standards
+
+### ESLint Configuration
+- Follow `@payloadcms/eslint-config` rules
+- Extend with Next.js specific rules
+- Enforce consistent import ordering
+- Require explicit return types for functions
+
+### Testing Requirements
+- Unit tests for utility functions
+- Integration tests for PayloadCMS functionality
+- E2E tests for complete user workflows
+- Minimum 80% code coverage
+
+### Performance Guidelines
+- Implement proper code splitting
+- Use React.memo for expensive components
+- Optimize bundle size
+- Implement proper caching strategies
+- Monitor Core Web Vitals
+
+## Security & Privacy
+
+### Data Protection
+- Implement proper GDPR compliance
+- Validate all user inputs
+- Sanitize data before storage
+- Use secure authentication methods
+- Follow OWASP guidelines
+
+### Dependencies
+- Keep dependencies updated
+- Audit for security vulnerabilities
+- Use peer dependencies appropriately
+- Minimize bundle size
+
+## Documentation Standards
+
+### Code Documentation
+- Document all public APIs
+- Use JSDoc for functions and classes
+- Provide usage examples
+- Document configuration options
+- Include migration guides
+
+### README Requirements
+- Clear installation instructions
+- Usage examples
+- Configuration options
+- API documentation
+- Contributing guidelines
+
+## Git & Versioning
+
+### Commit Messages
+- Use conventional commit format
+- Include scope (feat, fix, docs, etc.)
+- Write clear, descriptive messages
+- Reference issues when applicable
+
+### Branching Strategy
+- Use feature branches for development
+- Implement proper code reviews
+- Maintain clean commit history
+- Tag releases properly
+
+## Deployment & Build
+
+### Build Process
+- Use SWC for compilation
+- Generate proper TypeScript definitions
+- Copy static assets correctly
+- Implement proper tree shaking
+
+### Publishing
+- Follow semantic versioning
+- Update changelog
+- Test in development environment
+- Verify peer dependencies
+
+## Development Workflow
+
+### Local Development
+1. Use `pnpm dev` for development server
+2. Run tests with `pnpm test`
+3. Lint code with `pnpm lint:fix`
+4. Generate types with `pnpm dev:generate-types`
+
+### Before Committing
+1. Run full test suite
+2. Check TypeScript compilation
+3. Verify ESLint passes
+4. Update documentation if needed
+
+## Plugin-Specific Guidelines
+
+### Cookie Consent Implementation
+- Follow privacy regulation requirements
+- Implement proper consent management
+- Provide clear opt-out mechanisms
+- Store consent preferences securely
+- Support multiple consent categories
+
+### PayloadCMS Integration
+- Extend collections thoughtfully
+- Provide admin UI components
+- Implement proper field validation
+- Handle migration scenarios
+- Support plugin configuration
+
+## Advanced Patterns
+
+### Component Composition
+- Use compound components pattern
+- Implement render props when appropriate
+- Use React Context for shared state
+- Implement proper prop drilling solutions
+
+### State Management
+- Use React hooks for local state
+- Implement proper data fetching
+- Handle loading and error states
+- Use optimistic updates when appropriate
+
+### Performance Optimization
+- Implement proper memoization
+- Use React.Suspense for async operations
+- Optimize re-renders
+- Implement proper error boundaries
+
+---
+
+**Remember**: These rules are guidelines to ensure consistency, quality, and maintainability. When in doubt, prioritize user experience, security, and code clarity.
+

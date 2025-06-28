@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+I'm using pnpm as package manager
+
+
+Use context7 when you want up to date documentation

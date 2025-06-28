@@ -13,9 +13,7 @@ import { seed } from './seed.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-if (!process.env.ROOT_DIR) {
-  process.env.ROOT_DIR = dirname
-}
+process.env.ROOT_DIR ??= dirname
 
 const buildConfigWithMemoryDB = async () => {
   if (process.env.NODE_ENV === 'test') {
@@ -50,10 +48,32 @@ const buildConfigWithMemoryDB = async () => {
     ],
     db: mongooseAdapter({
       ensureIndexes: true,
-      url: process.env.DATABASE_URI || '',
+      url: process.env.DATABASE_URI ?? '',
     }),
     editor: lexicalEditor(),
     email: testEmailAdapter,
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: [
+        {
+          code: 'en',
+          label: 'English',
+        },
+        {
+          code: 'es',
+          label: 'Spanish',
+        },
+        {
+          code: 'fr',
+          label: 'French',
+        },
+        {
+          code: 'de',
+          label: 'German',
+        },
+      ],
+    },
     onInit: async (payload) => {
       await seed(payload)
     },
@@ -64,7 +84,7 @@ const buildConfigWithMemoryDB = async () => {
         },
       }),
     ],
-    secret: process.env.PAYLOAD_SECRET || 'test-secret_key',
+    secret: process.env.PAYLOAD_SECRET ?? 'test-secret_key',
     sharp,
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),

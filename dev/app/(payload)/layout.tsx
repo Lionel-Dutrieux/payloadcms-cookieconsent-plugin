@@ -1,14 +1,14 @@
-import type { ServerFunctionClient } from 'payload'
-
+import { getPayload, type ServerFunctionClient } from 'payload'
 import '@payloadcms/next/css'
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 import config from '@payload-config'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
+import { CookieConsentProvider } from 'payloadcms-cookieconsent-plugin/rsc'
 import React from 'react'
 
-import { importMap } from './admin/importMap.js'
 import './custom.scss'
+import { importMap } from './admin/importMap.js'
 
 type Args = {
   children: React.ReactNode
@@ -23,10 +23,15 @@ const serverFunction: ServerFunctionClient = async function (args) {
   })
 }
 
-const Layout = ({ children }: Args) => (
-  <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-    {children}
-  </RootLayout>
-)
+const Layout = async ({ children }: Args) => {
+  const payload = await getPayload({ config })
+  return (
+    <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
+      <CookieConsentProvider locale="en" payload={payload}>
+        {children}
+      </CookieConsentProvider>
+    </RootLayout>
+  )
+}
 
 export default Layout

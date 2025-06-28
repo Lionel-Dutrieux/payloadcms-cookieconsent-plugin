@@ -1,1 +1,1 @@
-export { BeforeDashboardClient } from '../components/BeforeDashboardClient.js'
+export { ScriptRowLabel } from '../components/ScriptRowLabel.js'

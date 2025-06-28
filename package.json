@@ -15,6 +15,11 @@
       "types": "./src/exports/client.ts",
       "default": "./src/exports/client.ts"
     },
+    "./client/ScriptRowLabel": {
+      "import": "./src/exports/ScriptRowLabel.ts",
+      "types": "./src/exports/ScriptRowLabel.ts",
+      "default": "./src/exports/ScriptRowLabel.ts"
+    },
     "./rsc": {
       "import": "./src/exports/rsc.ts",
       "types": "./src/exports/rsc.ts",
@@ -97,6 +102,11 @@
         "types": "./dist/exports/client.d.ts",
         "default": "./dist/exports/client.js"
       },
+      "./client/ScriptRowLabel": {
+        "import": "./dist/exports/ScriptRowLabel.js",
+        "types": "./dist/exports/ScriptRowLabel.d.ts",
+        "default": "./dist/exports/ScriptRowLabel.js"
+      },
       "./rsc": {
         "import": "./dist/exports/rsc.js",
         "types": "./dist/exports/rsc.d.ts",
@@ -111,5 +121,8 @@
       "sharp"
     ]
   },
-  "registry": "https://registry.npmjs.org/"
+  "registry": "https://registry.npmjs.org/",
+  "dependencies": {
+    "vanilla-cookieconsent": "3.1.0"
+  }
 }

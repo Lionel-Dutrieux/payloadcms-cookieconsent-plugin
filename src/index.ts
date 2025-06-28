@@ -1,6 +1,8 @@
 import type { CollectionSlug, Config } from 'payload'
 
+import { Categories } from './collections/Categories.js'
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
+import { CookieConsentSettings } from './globals/CookieConsentSettings.js'
 
 export type PayloadcmsCookieconsentPluginConfig = {
   /**
@@ -13,37 +15,7 @@ export type PayloadcmsCookieconsentPluginConfig = {
 export const payloadcmsCookieconsentPlugin =
   (pluginOptions: PayloadcmsCookieconsentPluginConfig) =>
   (config: Config): Config => {
-    if (!config.collections) {
-      config.collections = []
-    }
-
-    config.collections.push({
-      slug: 'plugin-collection',
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-      ],
-    })
-
-    if (pluginOptions.collections) {
-      for (const collectionSlug in pluginOptions.collections) {
-        const collection = config.collections.find(
-          (collection) => collection.slug === collectionSlug,
-        )
-
-        if (collection) {
-          collection.fields.push({
-            name: 'addedByPlugin',
-            type: 'text',
-            admin: {
-              position: 'sidebar',
-            },
-          })
-        }
-      }
-    }
+    config.collections ??= []
 
     /**
      * If the plugin is disabled, we still want to keep added collections/fields so the database schema is consistent which is important for migrations.
@@ -53,28 +25,18 @@ export const payloadcmsCookieconsentPlugin =
       return config
     }
 
-    if (!config.endpoints) {
-      config.endpoints = []
-    }
+    config.collections.push(Categories)
 
-    if (!config.admin) {
-      config.admin = {}
-    }
+    config.globals ??= []
+    config.globals.push(CookieConsentSettings)
 
-    if (!config.admin.components) {
-      config.admin.components = {}
-    }
+    config.endpoints ??= []
 
-    if (!config.admin.components.beforeDashboard) {
-      config.admin.components.beforeDashboard = []
-    }
+    config.admin ??= {}
 
-    config.admin.components.beforeDashboard.push(
-      `payloadcms-cookieconsent-plugin/client#BeforeDashboardClient`,
-    )
-    config.admin.components.beforeDashboard.push(
-      `payloadcms-cookieconsent-plugin/rsc#BeforeDashboardServer`,
-    )
+    config.admin.components ??= {}
+
+    config.admin.components.beforeDashboard ??= []
 
     config.endpoints.push({
       handler: customEndpointHandler,
@@ -90,23 +52,7 @@ export const payloadcmsCookieconsentPlugin =
         await incomingOnInit(payload)
       }
 
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        where: {
-          id: {
-            equals: 'seeded-by-plugin',
-          },
-        },
-      })
-
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          data: {
-            id: 'seeded-by-plugin',
-          },
-        })
-      }
+      payload.logger.info('Hello from the plugin')
     }
 
     return config

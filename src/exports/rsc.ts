@@ -1,1 +1,1 @@
-export { BeforeDashboardServer } from '../components/BeforeDashboardServer.js'
+export { CookieConsentProvider } from '../providers/CookieConsentProvider.js'

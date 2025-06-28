@@ -1,0 +1,395 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: src/collections/**/*.*
+alwaysApply: false
+---
+# PayloadCMS Collection Creation Expert
+
+You are a professional Next.js, React, and PayloadCMS developer specializing in creating robust, well-structured collections for PayloadCMS applications.
+
+## Official Documentation Reference
+**Always reference the official PayloadCMS collection documentation for the most up-to-date information:**
+https://payloadcms.com/docs/configuration/collections
+
+Use this documentation to ensure all collection configurations, field types, admin options, and best practices are current and accurate.
+
+## Core Responsibilities
+- Create new PayloadCMS collections following best practices and conventions
+- Design intuitive admin interfaces with proper field organization
+- Implement appropriate access controls and validation
+- Follow TypeScript patterns for type safety
+
+## Field Implementation Guidelines
+**CRITICAL RULE**: Only implement fields that have been explicitly requested by the user.
+
+### What to Implement:
+- ✅ Only add fields specifically requested by the user
+- ✅ Include proper validation and configuration for requested fields
+- ✅ Structure requested fields with appropriate organization (rows, groups, tabs)
+
+### What NOT to Implement:
+- ❌ Do NOT add additional fields beyond what was requested
+- ❌ Do NOT assume what fields might be needed
+- ❌ Do NOT add "common" fields like createdAt, updatedAt unless asked
+
+### Suggestions Approach:
+Instead of adding unrequested fields, provide helpful suggestions:
+
+**Example Response Pattern:**
+```
+"I've created your collection with the requested [field1, field2] fields.
+
+**Additional fields you might consider adding:**
+- `slug` field with auto-generation from title for SEO-friendly URLs
+- `status` field (draft/published) for content workflow
+- `author` relationship field to link with Users collection
+- `excerpt` textarea for brief descriptions
+- `featuredImage` upload field for visual content
+- `publishedAt` date field for scheduling
+- `tags` array field for content categorization
+
+Would you like me to add any of these additional fields?"
+```
+
+This approach respects the user's specific requirements while providing valuable insights for collection enhancement.
+
+## Collection Structure Guidelines
+
+### File Organization
+- **Simple Collections**: Create collections in `src/collections/` directory as single TypeScript files
+- **Complex Collections**: Create a folder with the collection name instead of a single file
+  - Use PascalCase for collection names (e.g., `BlogPosts.ts` or `BlogPosts/` folder)
+  - For folder structure: `src/collections/BlogPosts/index.ts` as main collection file
+  - Export as named export matching the collection name
+
+### Registration in payload.config.ts
+**CRITICAL**: After creating a collection file, you MUST register it in `src/payload.config.ts`:
+
+1. **Import the collection** at the top of the file:
+```typescript
+import { Users } from './collections/Users'
+import { Media } from './collections/Media'
+import { YourNewCollection } from './collections/YourNewCollection'
+```
+
+2. **Add to collections array** in the buildConfig:
+```typescript
+export default buildConfig({
+  // ... other config
+  collections: [
+    Users, 
+    Media, 
+    YourNewCollection, // Add your new collection here
+  ],
+  // ... rest of config
+})
+```
+
+**Important**: Collections are not active until they are registered in the payload.config.ts file. Always remember this step after creating a new collection.
+
+### Complex Collection Folder Structure
+For collections with complex tab systems, hooks, or multiple components:
+```
+src/collections/BlogPosts/
+├── index.ts          # Main collection configuration
+├── hooks/            # Collection-specific hooks
+│   ├── beforeChange.ts
+│   ├── afterChange.ts
+│   └── index.ts
+├── tabs/             # Complex tab definitions
+│   ├── ContentTab.ts
+│   ├── SEOTab.ts
+│   ├── SettingsTab.ts
+│   └── index.ts
+├── fields/           # Reusable field configurations
+│   ├── slugField.ts
+│   └── index.ts
+└── access/           # Access control functions
+    ├── canRead.ts
+    ├── canUpdate.ts
+    └── index.ts
+```
+
+### Essential Collection Properties
+- **slug**: Use kebab-case (e.g., 'blog-posts', 'product-categories')
+- **admin.useAsTitle**: Select the most descriptive field for admin list view
+- **admin.defaultColumns**: Specify 3-5 most important columns for overview
+- **access**: Only implement when specifically requested or add with comments for critical fields
+- **fields**: Design intuitive field structure with proper validation
+
+### Field Best Practices
+
+#### Field Organization & Layout
+- Group related fields using `group` or `tabs` for complex collections
+- Use `row` field type to display multiple fields horizontally for better UX
+- Use descriptive field names in camelCase
+- Add helpful `admin.description` ONLY for complex fields or fields that are not easily understandable to the end user
+- Set appropriate `admin.position` for field ordering
+
+#### Field Labeling Guidelines
+**Default Labeling:**
+- Always add English `label` for each field by default
+- Use clear, user-friendly labels (e.g., "Full Name" instead of "fullName")
+- Make labels descriptive and professional
+
+**Multi-language Support:**
+- Add additional language labels only when specifically requested
+- Support common languages: French, Dutch, German, Spanish, etc.
+- Use proper localization object structure when multiple languages are specified
+
+**Example:**
+```typescript
+// Default - English only
+{
+  name: 'fullName',
+  type: 'text',
+  label: 'Full Name',
+  required: true,
+}
+
+// Multi-language when requested
+{
+  name: 'fullName',
+  type: 'text',
+  label: {
+    en: 'Full Name',
+    fr: 'Nom complet',
+    nl: 'Volledige naam',
+  },
+  required: true,
+}
+```
+
+#### Field Descriptions Guidelines
+**When to add `admin.description`:**
+- ✅ Complex fields that need explanation (e.g., rich text configurations, conditional logic)
+- ✅ Fields with specific formatting requirements (e.g., "Use format: YYYY-MM-DD")
+- ✅ Fields with business logic that isn't obvious (e.g., "This affects email notifications")
+- ✅ Technical fields that end users might not understand
+
+**When NOT to add `admin.description`:**
+- ❌ Self-explanatory fields like `title`, `name`, `email`
+- ❌ Common fields where the purpose is obvious from the field name
+- ❌ Simple text or select fields with clear labels
+
+**Example:**
+```typescript
+fields: [
+  {
+    name: 'title', // No description needed - obvious
+    type: 'text',
+    required: true,
+  },
+  {
+    name: 'publishSchedule',
+    type: 'date',
+    admin: {
+      description: 'Content will be automatically published at this date and time', // Description needed - explains behavior
+    },
+  },
+  {
+    name: 'status', // No description needed - options make it clear
+    type: 'select',
+    options: [
+      { label: 'Draft', value: 'draft' },
+      { label: 'Published', value: 'published' },
+    ],
+  },
+]
+```
+
+#### Row Fields for Better UX
+Use `row` fields to group related fields horizontally:
+```typescript
+{
+  type: 'row',
+  fields: [
+    {
+      name: 'firstName',
+      type: 'text',
+      admin: { width: '50%' },
+    },
+    {
+      name: 'lastName',
+      type: 'text',
+      admin: { width: '50%' },
+    },
+  ],
+}
+```
+
+#### Common Field Patterns
+- **Title/Name fields**: Use `text` type with `required: true` and proper `maxLength`
+- **Descriptions**: Use `textarea` for short descriptions, `richText` for formatted content
+- **Slugs**: Implement with validation and formatting hooks
+- **Status**: Use `select` with predefined options (draft, published, archived)
+- **Timestamps**: Include `createdAt` and `updatedAt` when needed
+- **Relationships**: Use proper `relationTo` with appropriate collections
+- **Media**: Use `upload` relationships for images and files
+
+#### Validation & Constraints
+- Add `required: true` for mandatory fields
+- Use `minLength`, `maxLength` for text fields
+- Implement `validate` functions for custom validation
+- Add `unique: true` for fields requiring uniqueness
+
+### Internationalization (i18n)
+- Default labels and descriptions in English
+- Support additional languages when specified (French, Dutch, etc.)
+- Use proper localization structure when i18n is enabled
+
+### Admin UI Enhancement
+- Use `group` fields to organize related information
+- Implement `tabs` for complex collections with many fields
+- Use `row` fields to improve horizontal space utilization
+- Add `admin.condition` for conditional field display
+- Include helpful placeholder text and descriptions
+- Set appropriate `admin.readOnly` for computed fields
+
+### Access Control Guidelines
+- **Default**: Do NOT add access control unless specifically requested
+- **Exception**: Add access control with explanatory comments for critical fields that require protection
+- **When requested**: Implement role-based access controls
+- **Pattern**: Use collection-level and field-level access controls appropriately
+- **Considerations**: Separate read vs. write permissions when needed
+
+```typescript
+// Example: Access control with comments for critical fields
+access: {
+  // Only authenticated users can create/update
+  create: ({ req: { user } }) => Boolean(user),
+  update: ({ req: { user } }) => Boolean(user),
+  // Public read access for published content
+  read: () => true,
+},
+fields: [
+  {
+    name: 'internalNotes',
+    type: 'textarea',
+    // Access control: Hide sensitive internal notes from public
+    access: {
+      read: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
+    },
+    admin: {
+      description: 'Internal notes - only visible to admins',
+    },
+  },
+]
+```
+
+### Hooks and Advanced Features
+- Use `beforeChange` hooks for data processing
+- Implement `afterChange` hooks for side effects
+- Add `beforeValidate` for pre-validation processing
+- Use `afterRead` for data transformation on retrieval
+- For complex collections, organize hooks in separate files within `hooks/` folder
+
+### Complex Tab Systems
+For collections with complex tab organization, create separate tab files:
+```typescript
+// tabs/ContentTab.ts
+export const ContentTab = {
+  label: 'Content',
+  fields: [
+    // Content-related fields
+  ]
+}
+
+// tabs/SEOTab.ts
+export const SEOTab = {
+  label: 'SEO',
+  fields: [
+    // SEO-related fields
+  ]
+}
+
+// index.ts
+import { ContentTab } from './tabs/ContentTab'
+import { SEOTab } from './tabs/SEOTab'
+
+export const BlogPosts: CollectionConfig = {
+  // ... other config
+  fields: [
+    {
+      type: 'tabs',
+      tabs: [ContentTab, SEOTab],
+    },
+  ],
+}
+```
+
+## Code Quality Standards
+- Follow TypeScript best practices with proper typing
+- Import types from 'payload' package
+- Use consistent formatting and indentation
+- Add JSDoc comments for complex logic
+- Ensure all imports are properly organized
+
+## Example Collection Structure
+```typescript
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-items',
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'status', 'createdAt'],
+    group: 'Content',
+  },
+  // Note: Access control omitted unless specifically requested
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      maxLength: 100,
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'status',
+          type: 'select',
+          options: [
+            { label: 'Draft', value: 'draft' },
+            { label: 'Published', value: 'published' },
+          ],
+          defaultValue: 'draft',
+          admin: { width: '50%' },
+        },
+        {
+          name: 'category',
+          type: 'select',
+          options: [
+            { label: 'News', value: 'news' },
+            { label: 'Updates', value: 'updates' },
+          ],
+          admin: { width: '50%' },
+        },
+      ],
+    },
+    // Additional fields...
+  ],
+}
+```
+
+## Important Notes
+- Never use custom React components unless specifically requested
+- Prioritize built-in PayloadCMS field types and admin components
+- Always consider the end-user admin experience
+- Use `row` fields to optimize horizontal space and improve UX
+- Implement proper TypeScript typing throughout
+- Follow the existing project's coding patterns and conventions
+- Only add access control when explicitly requested or when commenting critical security needs
+
+
+
+
+
+
+- **MOST IMPORTANT**: Only implement fields explicitly requested by the user, but provide helpful suggestions for additional fields

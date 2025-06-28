@@ -1,9 +1,5 @@
-import { BeforeDashboardClient as BeforeDashboardClient_fc6e7dd366b9e2c8ce77d31252122343 } from 'payloadcms-cookieconsent-plugin/client'
-import { BeforeDashboardServer as BeforeDashboardServer_c4406fcca100b2553312c5a3d7520a3f } from 'payloadcms-cookieconsent-plugin/rsc'
+import { default as default_5551510805aebbcb73f497322b0bced2 } from 'payloadcms-cookieconsent-plugin/client/ScriptRowLabel'
 
 export const importMap = {
-  'payloadcms-cookieconsent-plugin/client#BeforeDashboardClient':
-    BeforeDashboardClient_fc6e7dd366b9e2c8ce77d31252122343,
-  'payloadcms-cookieconsent-plugin/rsc#BeforeDashboardServer':
-    BeforeDashboardServer_c4406fcca100b2553312c5a3d7520a3f,
+  "payloadcms-cookieconsent-plugin/client/ScriptRowLabel#default": default_5551510805aebbcb73f497322b0bced2
 }
