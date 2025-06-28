@@ -1,1 +1,1 @@
-export { ScriptRowLabel } from '../components/admin/ScriptRowLabel.js'
+export { ScriptRowLabel } from '../components/ScriptRowLabel.jsx'

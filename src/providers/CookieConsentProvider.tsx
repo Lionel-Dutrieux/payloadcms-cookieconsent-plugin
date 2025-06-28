@@ -7,12 +7,16 @@ import { CookieConsentBanner } from '../components/CookieConsentBanner.js'
 import { CookieConsentErrorBoundary } from '../components/CookieConsentErrorBoundary.js'
 import { CookieScriptManager } from '../components/CookieScriptManager.js'
 import { ERROR_MESSAGES } from '../constants/defaults.js'
-import { CategoryRepository } from '../lib/repositories/CategoryRepository.js'
 import { CookieConsentSettingsRepository } from '../lib/repositories/CookieConsentSettingsRepository.js'
 import { CookieConsentConfigService } from '../services/CookieConsentConfigService.js'
 
 interface CookieConsentProviderProps {
   children: ReactNode
+  /**
+   * Whether we are in preview mode (disables cache)
+   * @default false
+   */
+  isPreview?: boolean
   locale?: string
   /**
    * Custom error handler for debugging and monitoring
@@ -28,6 +32,7 @@ interface CookieConsentProviderProps {
 }
 
 interface CookieConsentContentProps {
+  isPreview?: boolean
   locale?: string
   payload: Payload
 }
@@ -54,29 +59,21 @@ const CookieConsentLoading = () => {
 /**
  * Internal component that handles data fetching and configuration
  */
-const CookieConsentContent = async ({ locale, payload }: CookieConsentContentProps) => {
+const CookieConsentContent = async ({
+  isPreview = false,
+  locale,
+  payload,
+}: CookieConsentContentProps) => {
   try {
-    // Initialize repositories
-    const categoryRepository = new CategoryRepository(payload)
-    const settingsRepository = new CookieConsentSettingsRepository(payload)
+    // Initialize service
     const configService = new CookieConsentConfigService()
 
-    // Fetch data in parallel for better performance
-    const [categoryDocs, settingsDoc] = await Promise.all([
-      categoryRepository.findEnabled(locale),
-      settingsRepository.findSettings(locale),
-    ])
+    // Generate configuration using cached service (respects preview mode)
+    const config = await configService.mapToConfigWithCache(payload, locale, isPreview)
 
-    // Validate that we have at least some categories
-    if (!categoryDocs || categoryDocs.length === 0) {
-      console.warn('No enabled cookie categories found. Cookie consent will not be displayed.')
-      return null
-    }
-
-    // Generate configuration using the service
-    const config = configService.mapToConfig(settingsDoc, categoryDocs, locale)
-
-    // Extract scripts for the script manager
+    // Extract scripts from the cache or repository (simple approach)
+    const settingsRepository = new CookieConsentSettingsRepository(payload)
+    const settingsDoc = await settingsRepository.findSettings(locale)
     const scripts = settingsDoc?.scripts || []
 
     return (
@@ -105,6 +102,7 @@ const CookieConsentContent = async ({ locale, payload }: CookieConsentContentPro
  */
 export const CookieConsentProvider = ({
   children,
+  isPreview = false,
   locale,
   onError,
   payload,
@@ -112,7 +110,7 @@ export const CookieConsentProvider = ({
 }: CookieConsentProviderProps) => {
   const content = (
     <Suspense fallback={<CookieConsentLoading />}>
-      <CookieConsentContent locale={locale} payload={payload} />
+      <CookieConsentContent isPreview={isPreview} locale={locale} payload={payload} />
     </Suspense>
   )
 

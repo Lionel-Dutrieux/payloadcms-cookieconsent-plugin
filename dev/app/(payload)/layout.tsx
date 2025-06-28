@@ -27,7 +27,7 @@ const Layout = async ({ children }: Args) => {
   const payload = await getPayload({ config })
   return (
     <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-      <CookieConsentProvider locale="en" payload={payload}>
+      <CookieConsentProvider isPreview={true} locale="en" payload={payload}>
         {children}
       </CookieConsentProvider>
     </RootLayout>

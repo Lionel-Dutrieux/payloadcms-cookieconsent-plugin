@@ -7,12 +7,37 @@ import type { CookieConsentSettingsDocument } from '../lib/repositories/CookieCo
 
 import {
   BEHAVIOR_DEFAULTS,
+  CACHE_DEFAULTS,
   COOKIE_DEFAULTS,
   ERROR_MESSAGES,
   UI_DEFAULTS,
 } from '../constants/defaults.js'
+import { CategoryRepository } from '../lib/repositories/CategoryRepository.js'
+import { CookieConsentSettingsRepository } from '../lib/repositories/CookieConsentSettingsRepository.js'
+
+interface CacheEntry {
+  data: any
+  timestamp: number
+}
 
 export class CookieConsentConfigService {
+  // Cache simple avec expiration
+  private static cache = new Map<string, CacheEntry>()
+
+  /**
+   * Vide le cache manuellement
+   */
+  static clearCache(): void {
+    CookieConsentConfigService.cache.clear()
+  }
+
+  /**
+   * Vérifie si une entrée de cache est expirée
+   */
+  private static isCacheExpired(entry: CacheEntry): boolean {
+    return Date.now() - entry.timestamp > CACHE_DEFAULTS.DURATION_MS
+  }
+
   /**
    * Creates categories configuration for vanilla-cookieconsent
    */
@@ -227,6 +252,57 @@ export class CookieConsentConfigService {
         },
         mode: settings.mode,
         revision: settings.revision,
+      }
+
+      return config
+    } catch (error) {
+      throw new Error(
+        `${ERROR_MESSAGES.INVALID_CONFIGURATION}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
+    }
+  }
+
+  /**
+   * Maps PayloadCMS data to CookieConsent v3 configuration (with conditional cache)
+   * Uses cache in production, bypasses cache in preview mode
+   * Cache duration: 60 minutes
+   */
+  async mapToConfigWithCache(
+    payload: any, // Type Payload
+    locale = 'en',
+    isPreview = false,
+  ): Promise<CookieConsentConfig> {
+    try {
+      // Générer une clé de cache unique
+      const cacheKey = `config-${locale || 'default'}`
+
+      // Si on est en preview, pas de cache
+      if (!isPreview) {
+        // Vérifier le cache
+        const cached = CookieConsentConfigService.cache.get(cacheKey)
+        if (cached && !CookieConsentConfigService.isCacheExpired(cached)) {
+          return cached.data
+        }
+      }
+
+      // Fetch data using repositories (même logique qu'avant)
+      const categoryRepository = new CategoryRepository(payload)
+      const settingsRepository = new CookieConsentSettingsRepository(payload)
+
+      const [categoryDocs, settingsDoc] = await Promise.all([
+        categoryRepository.findAll({ locale }),
+        settingsRepository.findSettings(locale),
+      ])
+
+      // Générer la configuration
+      const config = this.mapToConfig(settingsDoc, categoryDocs, locale)
+
+      // Mettre en cache si pas en preview
+      if (!isPreview) {
+        CookieConsentConfigService.cache.set(cacheKey, {
+          data: config,
+          timestamp: Date.now(),
+        })
       }
 
       return config

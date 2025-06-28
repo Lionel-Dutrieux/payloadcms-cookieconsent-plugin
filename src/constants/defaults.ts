@@ -44,6 +44,10 @@ export const BEHAVIOR_DEFAULTS = {
   REVISION: 0,
 } as const
 
+export const CACHE_DEFAULTS = {
+  DURATION_MS: 60 * 60 * 1000, // 60 minutes in milliseconds
+} as const
+
 export const ERROR_MESSAGES = {
   FAILED_TO_LOAD_CATEGORIES: 'Failed to load cookie categories',
   FAILED_TO_LOAD_SETTINGS: 'Failed to load cookie consent settings',
