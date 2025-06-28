@@ -1,7 +1,7 @@
-import type { Script } from '../lib/models/Script.js'
+import type { ScriptDocument } from '../lib/repositories/CookieConsentSettingsRepository.js'
 
 interface CookieScriptManagerProps {
-  scripts: Script[]
+  scripts: ScriptDocument[]
 }
 
 export const CookieScriptManager = ({ scripts }: CookieScriptManagerProps) => {
@@ -19,7 +19,7 @@ export const CookieScriptManager = ({ scripts }: CookieScriptManagerProps) => {
         return (
           <div
             dangerouslySetInnerHTML={{ __html: modifiedHtml }}
-            key={`${script.category}-${script.service || 'unknown'}-${index}`}
+            key={`${script.category.name}-${script.service || 'unknown'}-${index}`}
           />
         )
       })}

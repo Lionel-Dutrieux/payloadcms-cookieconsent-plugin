@@ -1,158 +1,129 @@
 import type { Payload } from 'payload'
-import type { CookieConsentConfig } from 'vanilla-cookieconsent'
+import type { ReactNode } from 'react'
 
-import type { Category, CookieConsentSettings } from '../lib/index.js'
+import { Suspense } from 'react'
 
 import { CookieConsentBanner } from '../components/CookieConsentBanner.js'
+import { CookieConsentErrorBoundary } from '../components/CookieConsentErrorBoundary.js'
 import { CookieScriptManager } from '../components/CookieScriptManager.js'
+import { ERROR_MESSAGES } from '../constants/defaults.js'
 import { CategoryRepository } from '../lib/repositories/CategoryRepository.js'
 import { CookieConsentSettingsRepository } from '../lib/repositories/CookieConsentSettingsRepository.js'
+import { CookieConsentConfigService } from '../services/CookieConsentConfigService.js'
 
 interface CookieConsentProviderProps {
-  children: React.ReactNode
+  children: ReactNode
+  locale?: string
+  /**
+   * Custom error handler for debugging and monitoring
+   */
+  onError?: (error: Error) => void
+  payload: Payload
+  /**
+   * Whether to use React error boundary for additional error handling.
+   * When true, provides better error isolation but requires client-side rendering.
+   * @default false
+   */
+  useErrorBoundary?: boolean
+}
+
+interface CookieConsentContentProps {
   locale?: string
   payload: Payload
 }
 
 /**
- * Maps PayloadCMS data to CookieConsent v3 configuration
+ * Error boundary component for cookie consent
  */
-function mapPayloadToCookieConsentConfig(
-  settings: CookieConsentSettings | null,
-  categories: Category[],
-  locale?: string,
-): CookieConsentConfig {
-  // Group scripts by category for the categories config
-  const categoriesConfig: { [key: string]: any } = {}
+const CookieConsentErrorFallback = ({ error }: { error: Error }) => {
+  console.error('Cookie consent initialization error:', error)
 
-  // Add categories from PayloadCMS
-  categories.forEach((category) => {
-    if (!category.enabled) {
-      return
-    }
-
-    categoriesConfig[category.name] = {
-      enabled: category.enabled,
-      readOnly: category.required,
-    }
-
-    // Add scripts as services for this category
-    const categoryScripts =
-      settings?.scripts?.filter((script) => script.category === category && script.enabled) || []
-
-    if (categoryScripts.length > 0) {
-      categoriesConfig[category.name].services = {}
-
-      categoryScripts.forEach((script) => {
-        categoriesConfig[category.name].services[
-          script.service.toLowerCase().replace(/\s+/g, '_')
-        ] = {
-          label: script.service,
-        }
-      })
-    }
-  })
-
-  // Build the complete configuration
-  const config: CookieConsentConfig = {
-    // Core settings
-    autoShow: settings?.autoShow ?? true,
-    disablePageInteraction: settings?.disablePageInteraction ?? false,
-    hideFromBots: settings?.hideFromBots ?? true,
-    mode: settings?.mode || 'opt-in',
-    revision: settings?.revision || 0,
-
-    // Cookie configuration
-    cookie: {
-      name: settings?.cookieName || 'cc_cookie',
-      domain: settings?.cookieDomain || undefined,
-      expiresAfterDays: settings?.cookieExpiresAfterDays || 182,
-      path: settings?.cookiePath || '/',
-      sameSite: settings?.cookieSameSite || 'Lax',
-    },
-
-    // Categories and services
-    categories: categoriesConfig,
-
-    // Language and UI configuration
-    language: {
-      autoDetect: 'document',
-      default: locale || 'en',
-      translations: {
-        [locale || 'en']: {
-          consentModal: {
-            acceptAllBtn: settings?.consentModal?.acceptAllBtn || 'Accept all',
-            acceptNecessaryBtn: settings?.consentModal?.acceptNecessaryBtn || 'Reject all',
-            description:
-              settings?.consentModal?.description ||
-              'We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic.',
-            showPreferencesBtn: settings?.consentModal?.showPreferencesBtn || 'Manage preferences',
-            title: settings?.consentModal?.title || 'We use cookies',
-          },
-          preferencesModal: {
-            acceptAllBtn: settings?.preferencesModal?.acceptAllBtn || 'Accept all',
-            acceptNecessaryBtn: settings?.preferencesModal?.acceptNecessaryBtn || 'Reject all',
-            closeIconLabel: settings?.preferencesModal?.closeIconLabel || 'Close modal',
-            savePreferencesBtn:
-              settings?.preferencesModal?.savePreferencesBtn || 'Save preferences',
-            sections: [
-              // Dynamic sections for each category
-              ...categories
-                .filter((category) => category.enabled)
-                .map((category) => ({
-                  description: category.description,
-                  linkedCategory: category.name,
-                  title:
-                    category.title ??
-                    category.name.charAt(0).toUpperCase() + category.name.slice(1) + ' Cookies',
-                })),
-            ],
-            serviceCounterLabel:
-              settings?.preferencesModal?.serviceCounterLabel || 'Service|Services',
-            title: settings?.preferencesModal?.title || 'Manage cookie preferences',
-          },
-        },
-      },
-    },
-
-    // GUI Options
-    guiOptions: {
-      consentModal: {
-        equalWeightButtons: settings?.consentModal?.equalWeightButtons ?? true,
-        flipButtons: settings?.consentModal?.flipButtons ?? false,
-        layout: settings?.consentModal?.layout || 'cloud inline',
-        position: (settings?.consentModal?.position || 'bottom center') as any,
-      },
-      preferencesModal: {
-        equalWeightButtons: settings?.preferencesModal?.equalWeightButtons ?? true,
-        flipButtons: settings?.preferencesModal?.flipButtons ?? false,
-        layout: settings?.preferencesModal?.layout || 'box',
-      },
-    },
-  }
-
-  return config
+  // Return null to gracefully degrade when cookie consent fails
+  // The main application will still work
+  return null
 }
 
-export const CookieConsentProvider = async ({
+/**
+ * Loading component while fetching data
+ */
+const CookieConsentLoading = () => {
+  // Return null for invisible loading state
+  return null
+}
+
+/**
+ * Internal component that handles data fetching and configuration
+ */
+const CookieConsentContent = async ({ locale, payload }: CookieConsentContentProps) => {
+  try {
+    // Initialize repositories
+    const categoryRepository = new CategoryRepository(payload)
+    const settingsRepository = new CookieConsentSettingsRepository(payload)
+    const configService = new CookieConsentConfigService()
+
+    // Fetch data in parallel for better performance
+    const [categoryDocs, settingsDoc] = await Promise.all([
+      categoryRepository.findEnabled(locale),
+      settingsRepository.findSettings(locale),
+    ])
+
+    // Validate that we have at least some categories
+    if (!categoryDocs || categoryDocs.length === 0) {
+      console.warn('No enabled cookie categories found. Cookie consent will not be displayed.')
+      return null
+    }
+
+    // Generate configuration using the service
+    const config = configService.mapToConfig(settingsDoc, categoryDocs, locale)
+
+    // Extract scripts for the script manager
+    const scripts = settingsDoc?.scripts || []
+
+    return (
+      <>
+        <CookieConsentBanner config={config} />
+        <CookieScriptManager scripts={scripts} />
+      </>
+    )
+  } catch (error) {
+    // Log error for debugging but don't crash the application
+    const errorMessage =
+      error instanceof Error ? error.message : ERROR_MESSAGES.INVALID_CONFIGURATION
+    console.error('Failed to initialize cookie consent:', errorMessage)
+
+    // Return the error fallback component
+    return (
+      <CookieConsentErrorFallback
+        error={error instanceof Error ? error : new Error(errorMessage)}
+      />
+    )
+  }
+}
+
+/**
+ * Main CookieConsentProvider component with error boundaries and loading states
+ */
+export const CookieConsentProvider = ({
   children,
   locale,
+  onError,
   payload,
+  useErrorBoundary = false,
 }: CookieConsentProviderProps) => {
-  const categoryRepository = new CategoryRepository(payload)
-  const categories = await categoryRepository.getCategories(locale)
-
-  const cookieConsentSettingsRepository = new CookieConsentSettingsRepository(payload)
-  const cookieConsentSettings = await cookieConsentSettingsRepository.getSettings(locale)
-
-  // Map PayloadCMS data to CookieConsent v3 config
-  const config = mapPayloadToCookieConsentConfig(cookieConsentSettings, categories, locale)
+  const content = (
+    <Suspense fallback={<CookieConsentLoading />}>
+      <CookieConsentContent locale={locale} payload={payload} />
+    </Suspense>
+  )
 
   return (
     <>
       {children}
-      <CookieConsentBanner config={config} />
-      <CookieScriptManager scripts={cookieConsentSettings?.scripts || []} />
+      {useErrorBoundary ? (
+        <CookieConsentErrorBoundary onError={onError}>{content}</CookieConsentErrorBoundary>
+      ) : (
+        content
+      )}
     </>
   )
 }

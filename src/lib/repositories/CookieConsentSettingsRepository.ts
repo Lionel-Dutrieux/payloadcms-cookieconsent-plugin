@@ -1,15 +1,68 @@
 import type { Payload } from 'payload'
 
-import type { CookieConsentSettings } from '../models/CookieConsentSettings.js'
+import { COLLECTION_SLUGS } from '../../constants/defaults.js'
+
+export interface ScriptDocument {
+  category: {
+    id: string
+    name: string
+  }
+  enabled: boolean
+  html: string
+  service: string
+}
+
+export interface ConsentModalDocument {
+  acceptAllBtn: string
+  acceptNecessaryBtn: string
+  description: string
+  equalWeightButtons: boolean
+  flipButtons: boolean
+  layout: 'bar' | 'bar inline' | 'box' | 'cloud' | 'cloud inline'
+  position: string
+  showPreferencesBtn: string
+  title: string
+}
+
+export interface PreferencesModalDocument {
+  acceptAllBtn: string
+  acceptNecessaryBtn: string
+  closeIconLabel: string
+  equalWeightButtons: boolean
+  flipButtons: boolean
+  layout: 'bar' | 'box'
+  savePreferencesBtn: string
+  serviceCounterLabel: string
+  title: string
+}
+
+export interface CookieConsentSettingsDocument {
+  autoShow: boolean
+  consentModal: ConsentModalDocument
+  cookieDomain?: string
+  cookieExpiresAfterDays: number
+  cookieName: string
+  cookiePath: string
+  cookieSameSite: 'Lax' | 'None' | 'Strict'
+  createdAt: string
+  disablePageInteraction: boolean
+  hideFromBots: boolean
+  id: string
+  mode: 'opt-in' | 'opt-out'
+  preferencesModal: PreferencesModalDocument
+  revision: number
+  scripts: ScriptDocument[]
+  updatedAt: string
+}
 
 export class CookieConsentSettingsRepository {
   constructor(private readonly payload: Payload) {}
 
-  async getSettings(locale?: string): Promise<CookieConsentSettings | null> {
+  async findSettings(locale?: string): Promise<CookieConsentSettingsDocument | null> {
     try {
       const result = await this.payload.findGlobal({
-        slug: 'cookie-consent-settings',
-        depth: 1,
+        slug: COLLECTION_SLUGS.COOKIE_CONSENT_SETTINGS,
+        depth: 1, // Need depth 1 to get category relationship data
         locale,
       })
 
@@ -17,52 +70,25 @@ export class CookieConsentSettingsRepository {
         return null
       }
 
-      return {
-        autoShow: result.autoShow ?? true,
-        consentModal: {
-          acceptAllBtn: result.consentModal?.acceptAllBtn ?? 'Accept all',
-          acceptNecessaryBtn: result.consentModal?.acceptNecessaryBtn ?? 'Reject all',
-          description:
-            result.consentModal?.description ??
-            'We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic.',
-          equalWeightButtons: result.consentModal?.equalWeightButtons ?? true,
-          flipButtons: result.consentModal?.flipButtons ?? false,
-          layout: result.consentModal?.layout ?? 'cloud inline',
-          position: result.consentModal?.position ?? 'bottom center',
-          showPreferencesBtn: result.consentModal?.showPreferencesBtn ?? 'Manage preferences',
-          title: result.consentModal?.title ?? 'We use cookies',
-        },
-        cookieDomain: result.cookieDomain,
-        cookieExpiresAfterDays: result.cookieExpiresAfterDays ?? 182,
-        cookieName: result.cookieName ?? 'cc_cookie',
-        cookiePath: result.cookiePath ?? '/',
-        cookieSameSite: result.cookieSameSite ?? 'Lax',
-        disablePageInteraction: result.disablePageInteraction ?? false,
-        hideFromBots: result.hideFromBots ?? true,
-        mode: result.mode ?? 'opt-in',
-        preferencesModal: {
-          acceptAllBtn: result.preferencesModal?.acceptAllBtn ?? 'Accept all',
-          acceptNecessaryBtn: result.preferencesModal?.acceptNecessaryBtn ?? 'Reject all',
-          closeIconLabel: result.preferencesModal?.closeIconLabel ?? 'Close modal',
-          equalWeightButtons: result.preferencesModal?.equalWeightButtons ?? true,
-          flipButtons: result.preferencesModal?.flipButtons ?? false,
-          layout: result.preferencesModal?.layout ?? 'box',
-          savePreferencesBtn: result.preferencesModal?.savePreferencesBtn ?? 'Save preferences',
-          serviceCounterLabel: result.preferencesModal?.serviceCounterLabel ?? 'Service|Services',
-          title: result.preferencesModal?.title ?? 'Manage cookie preferences',
-        },
-        revision: result.revision ?? 0,
-        scripts:
-          result.scripts?.map((script: any) => ({
-            category: script.category,
-            enabled: script.enabled ?? true,
-            html: script.html,
-            service: script.service,
-          })) ?? [],
-      }
+      return result as CookieConsentSettingsDocument
     } catch (error) {
-      console.error('Error fetching cookie consent settings:', error)
-      return null
+      throw new Error(
+        `Failed to fetch cookie consent settings: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
+    }
+  }
+
+  async updateRevision(newRevision: number, locale?: string): Promise<void> {
+    try {
+      await this.payload.updateGlobal({
+        slug: COLLECTION_SLUGS.COOKIE_CONSENT_SETTINGS,
+        data: { revision: newRevision },
+        locale,
+      })
+    } catch (error) {
+      throw new Error(
+        `Failed to update revision: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      )
     }
   }
 }

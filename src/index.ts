@@ -4,6 +4,10 @@ import { Categories } from './collections/Categories.js'
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 import { CookieConsentSettings } from './globals/CookieConsentSettings.js'
 
+export * from './constants/defaults.js'
+// Export the service and constants for advanced usage
+export { CookieConsentConfigService } from './services/CookieConsentConfigService.js'
+
 export type PayloadcmsCookieconsentPluginConfig = {
   /**
    * List of collections to add a custom field
