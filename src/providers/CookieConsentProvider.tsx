@@ -72,6 +72,7 @@ const CookieConsentContent = async ({
     const config = await configService.mapToConfigWithCache(payload, locale, isPreview)
 
     // Extract scripts from the cache or repository (simple approach)
+    // TODO : CACHE IS MISSING FOR SCRIPT
     const settingsRepository = new CookieConsentSettingsRepository(payload)
     const settingsDoc = await settingsRepository.findSettings(locale)
     const scripts = settingsDoc?.scripts || []

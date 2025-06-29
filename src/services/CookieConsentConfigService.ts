@@ -107,17 +107,12 @@ export class CookieConsentConfigService {
     }
   }
 
-  private mapScriptDocuments(
-    scripts: CookieConsentSettingsDocument['scripts'],
-    categories: CategoryDocument[],
-  ): Script[] {
+  private mapScriptDocuments(scripts: CookieConsentSettingsDocument['scripts']): Script[] {
     return scripts.map((script) => {
-      // Find the full category document to get all properties
-      const category = categories.find((cat) => cat.id === script.category.id)
-
       return {
         category: {
           name: script.category.name,
+          required: script.category.required,
         },
         enabled: script.enabled,
         html: script.html,
@@ -137,7 +132,7 @@ export class CookieConsentConfigService {
     try {
       // Map documents to domain models
       const categories = categoryDocs.map((doc) => this.mapCategoryDocument(doc))
-      const scripts = settingsDoc ? this.mapScriptDocuments(settingsDoc.scripts, categoryDocs) : []
+      const scripts = settingsDoc ? this.mapScriptDocuments(settingsDoc.scripts) : []
 
       // Apply defaults using nullish coalescing for cleaner code
       const settings = {

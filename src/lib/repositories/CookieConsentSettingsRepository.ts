@@ -6,6 +6,7 @@ export interface ScriptDocument {
   category: {
     id: string
     name: string
+    required: boolean
   }
   enabled: boolean
   html: string

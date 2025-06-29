@@ -1,6 +1,7 @@
 import type { CollectionSlug, Config } from 'payload'
 
 import { Categories } from './collections/Categories.js'
+import { ConsentRecords } from './collections/ConsentRecords.js'
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 import { CookieConsentSettings } from './globals/CookieConsentSettings.js'
 
@@ -29,7 +30,7 @@ export const payloadcmsCookieconsentPlugin =
       return config
     }
 
-    config.collections.push(Categories)
+    config.collections.push(Categories, ConsentRecords)
 
     config.globals ??= []
     config.globals.push(CookieConsentSettings)

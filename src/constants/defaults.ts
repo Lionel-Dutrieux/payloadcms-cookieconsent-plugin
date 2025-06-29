@@ -1,5 +1,6 @@
 export const COLLECTION_SLUGS = {
   CATEGORIES: 'categories',
+  CONSENT_RECORDS: 'consent-records',
   COOKIE_CONSENT_SETTINGS: 'cookie-consent-settings',
 } as const
 

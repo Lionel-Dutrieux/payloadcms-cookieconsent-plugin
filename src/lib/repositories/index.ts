@@ -1,4 +1,5 @@
 export { type CategoryDocument, CategoryRepository } from './CategoryRepository.js'
+export { ConsentRecordRepository } from './ConsentRecordRepository.js'
 export {
   type ConsentModalDocument,
   type CookieConsentSettingsDocument,

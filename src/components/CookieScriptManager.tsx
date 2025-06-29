@@ -10,10 +10,13 @@ export const CookieScriptManager = ({ scripts }: CookieScriptManagerProps) => {
   return (
     <>
       {enabledScripts.map((script, index) => {
-        // Parse the script tag to add necessary attributes
+        // For required/necessary categories, don't add type="text/plain" so scripts execute immediately
+        // For optional categories, add type="text/plain" to block execution until consent
+        const isRequired = script.category.required
+
         const modifiedHtml = script.html.replace(
           /<script/i,
-          `<script data-category="${script.category.name}"${script.service ? ` data-service="${script.service}"` : ''} type="text/plain"`,
+          `<script data-category="${script.category.name}"${script.service ? ` data-service="${script.service}"` : ''}${!isRequired ? ' type="text/plain"' : ''}`,
         )
 
         return (

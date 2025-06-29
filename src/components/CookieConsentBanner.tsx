@@ -9,6 +9,26 @@ interface CookieConsentBannerProps {
 }
 
 export const CookieConsentBanner = ({ config }: CookieConsentBannerProps) => {
+  config.onFirstConsent = () => {
+    console.log('onFirstConsent')
+  }
+
+  config.onChange = () => {
+    console.log('onChange')
+
+    const cookie = CookieConsent.getCookie()
+    const preferences = CookieConsent.getUserPreferences()
+
+    const userConsent = {
+      acceptedCategories: preferences.acceptedCategories,
+      acceptType: preferences.acceptType,
+      consentId: cookie.consentId,
+      rejectedCategories: preferences.rejectedCategories,
+    }
+
+    console.log(userConsent)
+  }
+
   useEffect(() => {
     void CookieConsent.run(config)
   }, [config])
