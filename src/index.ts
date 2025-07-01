@@ -2,7 +2,7 @@ import type { CollectionSlug, Config } from 'payload'
 
 import { Categories } from './collections/Categories.js'
 import { ConsentRecords } from './collections/ConsentRecords.js'
-import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
+import { consentEndpointHandler } from './endpoints/consentEndpointHandler.js'
 import { CookieConsentSettings } from './globals/CookieConsentSettings.js'
 
 export * from './constants/defaults.js'
@@ -44,9 +44,9 @@ export const payloadcmsCookieconsentPlugin =
     config.admin.components.beforeDashboard ??= []
 
     config.endpoints.push({
-      handler: customEndpointHandler,
-      method: 'get',
-      path: '/my-plugin-endpoint',
+      handler: consentEndpointHandler,
+      method: 'post',
+      path: '/consent',
     })
 
     const incomingOnInit = config.onInit
