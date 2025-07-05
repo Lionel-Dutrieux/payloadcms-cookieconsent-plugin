@@ -11,7 +11,11 @@ export class ConsentRecordRepository {
    * @param event The consent event to add
    * @returns The updated or created ConsentRecord
    */
-  async addConsentEvent(consentId: string, event: ConsentEvent): Promise<ConsentRecord> {
+  async addConsentEvent(
+    consentId: string,
+    event: ConsentEvent,
+    userId?: string,
+  ): Promise<ConsentRecord> {
     // Try to find the existing record
     const existing = await this.payload.find({
       collection: 'consent-records',
@@ -26,6 +30,7 @@ export class ConsentRecordRepository {
         collection: 'consent-records',
         data: {
           newEvent: event,
+          ...(userId ? { user: userId } : {}),
         },
       })
       return updated as unknown as ConsentRecord
@@ -36,6 +41,7 @@ export class ConsentRecordRepository {
         data: {
           consentId,
           events: [event],
+          ...(userId ? { user: userId } : {}),
         },
       })
       return created as unknown as ConsentRecord

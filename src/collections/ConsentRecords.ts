@@ -10,6 +10,7 @@ export const ConsentRecords: CollectionConfig = {
   },
   admin: {
     defaultColumns: [
+      'user',
       'consentId',
       'lastModified',
       'createdAt',
@@ -17,11 +18,19 @@ export const ConsentRecords: CollectionConfig = {
       'acceptedCategoriesCount',
       'rejectedCategoriesCount',
     ],
-    description: 'Immutable user consent history (GDPR-compliant)',
     group: 'Cookie Consent',
     useAsTitle: 'consentId',
   },
   fields: [
+    {
+      name: 'user',
+      type: 'relationship',
+      admin: { readOnly: true },
+      hasMany: false,
+      label: 'User',
+      relationTo: 'users',
+      required: false,
+    },
     {
       name: 'consentId',
       type: 'text',
@@ -35,14 +44,14 @@ export const ConsentRecords: CollectionConfig = {
       name: 'createdAt',
       type: 'date',
       admin: { readOnly: true },
-      label: 'Created At',
+      label: 'Consent Created At',
       required: true,
     },
     {
       name: 'lastModified',
       type: 'date',
       admin: { readOnly: true },
-      label: 'Last Modified',
+      label: 'Last Modified At',
       required: true,
     },
     {
@@ -54,14 +63,14 @@ export const ConsentRecords: CollectionConfig = {
           name: 'timestamp',
           type: 'date',
           admin: { readOnly: true },
-          label: 'Timestamp',
+          label: 'Event Timestamp',
           required: true,
         },
         {
           name: 'action',
           type: 'select',
           admin: { readOnly: true },
-          label: 'Action',
+          label: 'Consent Action',
           options: [
             { label: 'Granted', value: 'granted' },
             { label: 'Modified', value: 'modified' },
@@ -88,7 +97,7 @@ export const ConsentRecords: CollectionConfig = {
           name: 'acceptType',
           type: 'text',
           admin: { readOnly: true },
-          label: 'Accept Type',
+          label: 'Consent Accept Type',
           required: true,
         },
         {
@@ -160,7 +169,10 @@ export const ConsentRecords: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      ({ data, operation }) => {
+      ({ data, operation, req }) => {
+        if (req?.user) {
+          data.user = req.user.id || req.user._id
+        }
         const now = new Date().toISOString()
         if (operation === 'create') {
           data.createdAt = now

@@ -64,12 +64,17 @@ export const consentEndpointHandler = async (req: PayloadRequest) => {
     const ipAddress = ip ? hashIp(ip) : undefined
 
     const repo = new ConsentRecordRepository(req.payload)
-    const record = await repo.addConsentEvent(consentId, {
-      ...event,
-      ipAddress,
-      timestamp: new Date().toISOString(),
-      userAgent,
-    })
+    const userId = req.user?.id || req.user?._id
+    const record = await repo.addConsentEvent(
+      consentId,
+      {
+        ...event,
+        ipAddress,
+        timestamp: new Date().toISOString(),
+        userAgent,
+      },
+      userId,
+    )
     return Response.json({ record, success: true })
   } catch (error) {
     console.error('Error saving consent:', error)
