@@ -4,7 +4,7 @@ export const Categories: CollectionConfig = {
   slug: 'categories',
   admin: {
     defaultColumns: ['name', 'title', 'enabled', 'required'],
-    group: 'Scripts Management',
+    group: 'Cookie Consent Manager',
     listSearchableFields: ['name', 'title'],
     useAsTitle: 'name',
   },

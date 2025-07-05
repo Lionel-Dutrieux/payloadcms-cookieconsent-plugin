@@ -18,41 +18,51 @@ export const ConsentRecords: CollectionConfig = {
       'acceptedCategoriesCount',
       'rejectedCategoriesCount',
     ],
-    group: 'Cookie Consent',
+    group: 'Cookie Consent Manager',
     useAsTitle: 'consentId',
   },
   fields: [
     {
-      name: 'user',
-      type: 'relationship',
-      admin: { readOnly: true },
-      hasMany: false,
-      label: 'User',
-      relationTo: 'users',
-      required: false,
+      type: 'row',
+      fields: [
+        {
+          name: 'user',
+          type: 'relationship',
+          admin: { readOnly: true },
+          hasMany: false,
+          label: 'User',
+          relationTo: 'users',
+          required: false,
+        },
+        {
+          name: 'consentId',
+          type: 'text',
+          admin: { readOnly: true },
+          index: true,
+          label: 'Consent ID',
+          required: true,
+          unique: true,
+        },
+      ],
     },
     {
-      name: 'consentId',
-      type: 'text',
-      admin: { readOnly: true },
-      index: true,
-      label: 'Consent ID',
-      required: true,
-      unique: true,
-    },
-    {
-      name: 'createdAt',
-      type: 'date',
-      admin: { readOnly: true },
-      label: 'Consent Created At',
-      required: true,
-    },
-    {
-      name: 'lastModified',
-      type: 'date',
-      admin: { readOnly: true },
-      label: 'Last Modified At',
-      required: true,
+      type: 'row',
+      fields: [
+        {
+          name: 'createdAt',
+          type: 'date',
+          admin: { readOnly: true },
+          label: 'Consent Created At',
+          required: true,
+        },
+        {
+          name: 'lastModified',
+          type: 'date',
+          admin: { readOnly: true },
+          label: 'Last Modified At',
+          required: true,
+        },
+      ],
     },
     {
       name: 'events',
@@ -201,6 +211,10 @@ export const ConsentRecords: CollectionConfig = {
         return data
       },
     ],
+  },
+  labels: {
+    plural: 'Consents',
+    singular: 'Consent',
   },
   timestamps: false, // We handle createdAt/lastModified manually
   versions: false, // No Payload drafts/versions

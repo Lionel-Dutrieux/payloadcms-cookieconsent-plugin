@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 export const CookieConsentSettings: GlobalConfig = {
   slug: 'cookie-consent-settings',
   admin: {
-    group: 'Settings',
+    group: 'Cookie Consent Manager',
   },
   fields: [
     {
@@ -530,6 +530,7 @@ export const CookieConsentSettings: GlobalConfig = {
       },
     ],
   },
+  label: 'Settings',
   versions: {
     drafts: true,
     max: 0,
