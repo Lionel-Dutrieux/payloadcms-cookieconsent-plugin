@@ -10,11 +10,11 @@ interface CookieConsentBannerProps {
 
 export const CookieConsentBanner = ({ config }: CookieConsentBannerProps) => {
   config.onFirstConsent = () => {
-    logConsent()
+    logConsent('granted')
   }
 
   config.onChange = () => {
-    logConsent()
+    logConsent('modified')
   }
 
   useEffect(() => {
@@ -24,19 +24,23 @@ export const CookieConsentBanner = ({ config }: CookieConsentBannerProps) => {
   return <></>
 }
 
-const logConsent = () => {
+const logConsent = (action: 'granted' | 'modified' | 'renewed' | 'withdrawn') => {
   const cookie = CookieConsent.getCookie()
   const preferences = CookieConsent.getUserPreferences()
 
-  const userConsent = {
+  const event = {
     acceptedCategories: preferences.acceptedCategories,
     acceptType: preferences.acceptType,
-    consentId: cookie.consentId,
+    action,
     rejectedCategories: preferences.rejectedCategories,
+    // userAgent and ipAddress are set server-side
   }
 
+  const consentId = cookie.consentId
+
   void fetch('/api/consent', {
-    body: JSON.stringify(userConsent),
+    body: JSON.stringify({ consentId, event }),
+    headers: { 'Content-Type': 'application/json' },
     method: 'POST',
   }).catch((error) => {
     console.error('Error saving consent:', error)

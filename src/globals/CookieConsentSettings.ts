@@ -441,9 +441,6 @@ export const CookieConsentSettings: GlobalConfig = {
               name: 'scripts',
               type: 'array',
               admin: {
-                components: {
-                  RowLabel: 'payloadcms-cookieconsent-plugin/client/ScriptRowLabel',
-                },
                 description: 'Manage all tracking scripts and their categories in one place',
               },
               fields: [

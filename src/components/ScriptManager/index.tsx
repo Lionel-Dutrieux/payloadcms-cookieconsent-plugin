@@ -1,7 +1,7 @@
-import type { ScriptDocument } from '../lib/repositories/CookieConsentSettingsRepository.js'
+import type { Script } from '../../globals/types.js'
 
 interface CookieScriptManagerProps {
-  scripts: ScriptDocument[]
+  scripts: Script[]
 }
 
 export const CookieScriptManager = ({ scripts }: CookieScriptManagerProps) => {
