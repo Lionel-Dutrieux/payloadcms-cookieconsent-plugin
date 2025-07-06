@@ -67,7 +67,12 @@ export const ConsentRecords: CollectionConfig = {
     {
       name: 'events',
       type: 'array',
-      admin: { readOnly: true },
+      admin: {
+        components: {
+          RowLabel: 'payloadcms-cookieconsent-plugin/admin/ConsentEventRowLabel',
+        },
+        readOnly: true,
+      },
       fields: [
         {
           name: 'timestamp',

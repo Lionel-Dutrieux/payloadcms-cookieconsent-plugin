@@ -19,6 +19,16 @@
       "import": "./src/exports/rsc.ts",
       "types": "./src/exports/rsc.ts",
       "default": "./src/exports/rsc.ts"
+    },
+    "./admin/ScriptRowLabel": {
+      "import": "./src/exports/ScriptRowLabel.ts",
+      "types": "./src/exports/ScriptRowLabel.ts",
+      "default": "./src/exports/ScriptRowLabel.ts"
+    },
+    "./admin/ConsentEventRowLabel": {
+      "import": "./src/exports/ConsentEventRowLabel.ts",
+      "types": "./src/exports/ConsentEventRowLabel.ts",
+      "default": "./src/exports/ConsentEventRowLabel.ts"
     }
   },
   "main": "./src/exports/index.ts",
@@ -101,6 +111,16 @@
         "import": "./dist/exports/rsc.js",
         "types": "./dist/exports/rsc.d.ts",
         "default": "./dist/exports/rsc.js"
+      },
+      "./admin/ScriptRowLabel": {
+        "import": "./src/exports/ScriptRowLabel.js",
+        "types": "./src/exports/ScriptRowLabel.d.ts",
+        "default": "./src/exports/ScriptRowLabel.js"
+      },
+      "./admin/ConsentEventRowLabel": {
+        "import": "./src/exports/ConsentEventRowLabel.js",
+        "types": "./src/exports/ConsentEventRowLabel.d.ts",
+        "default": "./src/exports/ConsentEventRowLabel.js"
       }
     },
     "main": "./dist/exports/index.js",
