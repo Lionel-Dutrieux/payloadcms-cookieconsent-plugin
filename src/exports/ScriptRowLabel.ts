@@ -1,1 +1,1 @@
-export { ScriptRowLabel as default } from '../components/ScriptRowLabel.js'
+export { ScriptRowLabel as default } from '../components/admin/ScriptRowLabel.js'

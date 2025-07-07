@@ -3,7 +3,7 @@ import type { GlobalConfig } from 'payload'
 export const CookieConsentSettings: GlobalConfig = {
   slug: 'cookie-consent-settings',
   admin: {
-    group: 'Settings',
+    group: 'Cookie Consent Manager',
   },
   fields: [
     {
@@ -442,7 +442,7 @@ export const CookieConsentSettings: GlobalConfig = {
               type: 'array',
               admin: {
                 components: {
-                  RowLabel: 'payloadcms-cookieconsent-plugin/client/ScriptRowLabel',
+                  RowLabel: 'payloadcms-cookieconsent-plugin/admin/ScriptRowLabel',
                 },
                 description: 'Manage all tracking scripts and their categories in one place',
               },
@@ -533,6 +533,7 @@ export const CookieConsentSettings: GlobalConfig = {
       },
     ],
   },
+  label: 'Settings',
   versions: {
     drafts: true,
     max: 0,

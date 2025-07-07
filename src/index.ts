@@ -7,7 +7,7 @@ import { CookieConsentSettings } from './globals/CookieConsentSettings.js'
 
 export * from './constants/defaults.js'
 // Export the service and constants for advanced usage
-export { CookieConsentConfigService } from './services/CookieConsentConfigService.js'
+export { CookieConsentConfigMapper } from './data/CookieConsentConfigMapper.js'
 
 export type PayloadcmsCookieconsentPluginConfig = {
   /**

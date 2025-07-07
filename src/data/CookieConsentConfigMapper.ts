@@ -1,70 +1,34 @@
 import type { CookieConsentConfig } from 'vanilla-cookieconsent'
 
-import type { Category } from '../lib/models/Category.js'
-import type { Script } from '../lib/models/Script.js'
-import type { CategoryDocument } from '../lib/repositories/CategoryRepository.js'
-import type { CookieConsentSettingsDocument } from '../lib/repositories/CookieConsentSettingsRepository.js'
+import type { Category } from '../collections/types.js'
+import type { CookieConsentSettings, Script } from '../globals/types.js'
 
 import {
   BEHAVIOR_DEFAULTS,
-  CACHE_DEFAULTS,
   COOKIE_DEFAULTS,
   ERROR_MESSAGES,
   UI_DEFAULTS,
 } from '../constants/defaults.js'
-import { CategoryRepository } from '../lib/repositories/CategoryRepository.js'
-import { CookieConsentSettingsRepository } from '../lib/repositories/CookieConsentSettingsRepository.js'
 
-interface CacheEntry {
-  data: any
-  timestamp: number
-}
-
-export class CookieConsentConfigService {
-  // Cache simple avec expiration
-  private static cache = new Map<string, CacheEntry>()
-
-  /**
-   * Vide le cache manuellement
-   */
-  static clearCache(): void {
-    CookieConsentConfigService.cache.clear()
-  }
-
-  /**
-   * Vérifie si une entrée de cache est expirée
-   */
-  private static isCacheExpired(entry: CacheEntry): boolean {
-    return Date.now() - entry.timestamp > CACHE_DEFAULTS.DURATION_MS
-  }
-
-  /**
-   * Creates categories configuration for vanilla-cookieconsent
-   */
+export class CookieConsentConfigMapper {
   private createCategoriesConfig(
     categories: Category[],
     scripts: Script[],
   ): { [key: string]: any } {
     const categoriesConfig: { [key: string]: any } = {}
-
     categories.forEach((category) => {
       if (!category.enabled) {
         return
       }
-
       categoriesConfig[category.name] = {
         enabled: category.enabled,
         readOnly: category.required,
       }
-
-      // Add scripts as services for this category
       const categoryScripts = scripts.filter(
         (script) => script.category === category && script.enabled,
       )
-
       if (categoryScripts.length > 0) {
         categoriesConfig[category.name].services = {}
-
         categoryScripts.forEach((script) => {
           const serviceKey = script.service.toLowerCase().replace(/\s+/g, '_')
           categoriesConfig[category.name].services[serviceKey] = {
@@ -73,13 +37,9 @@ export class CookieConsentConfigService {
         })
       }
     })
-
     return categoriesConfig
   }
 
-  /**
-   * Creates preference modal sections from categories
-   */
   private createPreferenceModalSections(categories: Category[]): Array<{
     description: string
     linkedCategory: string
@@ -94,20 +54,11 @@ export class CookieConsentConfigService {
       }))
   }
 
-  /**
-   * Maps PayloadCMS documents to domain models
-   */
-  private mapCategoryDocument(doc: CategoryDocument): Category {
-    return {
-      name: doc.name,
-      description: doc.description,
-      enabled: doc.enabled,
-      required: doc.required,
-      title: doc.title,
-    }
+  private mapCategoryDocument(doc: Category): Category {
+    return doc
   }
 
-  private mapScriptDocuments(scripts: CookieConsentSettingsDocument['scripts']): Script[] {
+  private mapScriptDocuments(scripts: Script[]): Script[] {
     return scripts.map((script) => {
       return {
         category: {
@@ -121,20 +72,14 @@ export class CookieConsentConfigService {
     })
   }
 
-  /**
-   * Maps PayloadCMS data to CookieConsent v3 configuration
-   */
   mapToConfig(
-    settingsDoc: CookieConsentSettingsDocument | null,
-    categoryDocs: CategoryDocument[],
+    settingsDoc: CookieConsentSettings | null,
+    categoryDocs: Category[],
     locale = 'en',
   ): CookieConsentConfig {
     try {
-      // Map documents to domain models
-      const categories = categoryDocs.map((doc) => this.mapCategoryDocument(doc))
+      const categories = categoryDocs
       const scripts = settingsDoc ? this.mapScriptDocuments(settingsDoc.scripts) : []
-
-      // Apply defaults using nullish coalescing for cleaner code
       const settings = {
         autoShow: settingsDoc?.autoShow ?? BEHAVIOR_DEFAULTS.AUTO_SHOW,
         consentModal: {
@@ -194,8 +139,6 @@ export class CookieConsentConfigService {
         },
         revision: settingsDoc?.revision ?? BEHAVIOR_DEFAULTS.REVISION,
       }
-
-      // Build the complete configuration
       const config: CookieConsentConfig = {
         autoShow: settings.autoShow,
         categories: this.createCategoriesConfig(categories, scripts),
@@ -248,58 +191,6 @@ export class CookieConsentConfigService {
         mode: settings.mode,
         revision: settings.revision,
       }
-
-      return config
-    } catch (error) {
-      throw new Error(
-        `${ERROR_MESSAGES.INVALID_CONFIGURATION}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
-    }
-  }
-
-  /**
-   * Maps PayloadCMS data to CookieConsent v3 configuration (with conditional cache)
-   * Uses cache in production, bypasses cache in preview mode
-   * Cache duration: 60 minutes
-   */
-  async mapToConfigWithCache(
-    payload: any, // Type Payload
-    locale = 'en',
-    isPreview = false,
-  ): Promise<CookieConsentConfig> {
-    try {
-      // Générer une clé de cache unique
-      const cacheKey = `config-${locale || 'default'}`
-
-      // Si on est en preview, pas de cache
-      if (!isPreview) {
-        // Vérifier le cache
-        const cached = CookieConsentConfigService.cache.get(cacheKey)
-        if (cached && !CookieConsentConfigService.isCacheExpired(cached)) {
-          return cached.data
-        }
-      }
-
-      // Fetch data using repositories (même logique qu'avant)
-      const categoryRepository = new CategoryRepository(payload)
-      const settingsRepository = new CookieConsentSettingsRepository(payload)
-
-      const [categoryDocs, settingsDoc] = await Promise.all([
-        categoryRepository.findAll({ locale }),
-        settingsRepository.findSettings(locale),
-      ])
-
-      // Générer la configuration
-      const config = this.mapToConfig(settingsDoc, categoryDocs, locale)
-
-      // Mettre en cache si pas en preview
-      if (!isPreview) {
-        CookieConsentConfigService.cache.set(cacheKey, {
-          data: config,
-          timestamp: Date.now(),
-        })
-      }
-
       return config
     } catch (error) {
       throw new Error(

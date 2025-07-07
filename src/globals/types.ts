@@ -1,5 +1,3 @@
-import type { Script } from './Script.js'
-
 export interface ConsentModal {
   acceptAllBtn: string
   acceptNecessaryBtn: string
@@ -22,6 +20,13 @@ export interface PreferencesModal {
   savePreferencesBtn: string
   serviceCounterLabel: string
   title: string
+}
+
+export interface Script {
+  category: { name: string; required: boolean }
+  enabled: boolean
+  html: string
+  service: string
 }
 
 export interface CookieConsentSettings {

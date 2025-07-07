@@ -3,12 +3,12 @@ import type { ReactNode } from 'react'
 
 import { Suspense } from 'react'
 
-import { CookieConsentBanner } from '../components/CookieConsentBanner.js'
-import { CookieConsentErrorBoundary } from '../components/CookieConsentErrorBoundary.js'
-import { CookieScriptManager } from '../components/CookieScriptManager.js'
+import { CookieConsentBanner } from '../components/Banner/index.js'
+import { CookieScriptManager } from '../components/ScriptManager/index.js'
 import { ERROR_MESSAGES } from '../constants/defaults.js'
-import { CookieConsentSettingsRepository } from '../lib/repositories/CookieConsentSettingsRepository.js'
-import { CookieConsentConfigService } from '../services/CookieConsentConfigService.js'
+import { CategoryRepository } from '../data/CategoryRepository.js'
+import { CookieConsentConfigMapper } from '../data/CookieConsentConfigMapper.js'
+import { CookieConsentSettingsRepository } from '../data/CookieConsentSettingsRepository.js'
 
 interface CookieConsentProviderProps {
   children: ReactNode
@@ -65,18 +65,15 @@ const CookieConsentContent = async ({
   payload,
 }: CookieConsentContentProps) => {
   try {
-    // Initialize service
-    const configService = new CookieConsentConfigService()
-
-    // Generate configuration using cached service (respects preview mode)
-    const config = await configService.mapToConfigWithCache(payload, locale, isPreview)
-
-    // Extract scripts from the cache or repository (simple approach)
-    // TODO : CACHE IS MISSING FOR SCRIPT
+    const configMapper = new CookieConsentConfigMapper()
     const settingsRepository = new CookieConsentSettingsRepository(payload)
-    const settingsDoc = await settingsRepository.findSettings(locale)
+    const categoryRepository = new CategoryRepository(payload)
+    const [settingsDoc, categories] = await Promise.all([
+      settingsRepository.findSettings(locale),
+      categoryRepository.findAll({ locale }),
+    ])
+    const config = configMapper.mapToConfig(settingsDoc, categories, locale)
     const scripts = settingsDoc?.scripts || []
-
     return (
       <>
         <CookieConsentBanner config={config} />
@@ -114,15 +111,10 @@ export const CookieConsentProvider = ({
       <CookieConsentContent isPreview={isPreview} locale={locale} payload={payload} />
     </Suspense>
   )
-
   return (
     <>
       {children}
-      {useErrorBoundary ? (
-        <CookieConsentErrorBoundary onError={onError}>{content}</CookieConsentErrorBoundary>
-      ) : (
-        content
-      )}
+      {content}
     </>
   )
 }

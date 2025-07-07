@@ -1,17 +1,8 @@
 import type { Payload } from 'payload'
 
-import { COLLECTION_SLUGS } from '../../constants/defaults.js'
+import type { Category } from '../collections/types.js'
 
-export interface CategoryDocument {
-  createdAt: string
-  description: string
-  enabled: boolean
-  id: string
-  name: string
-  required: boolean
-  title: string
-  updatedAt: string
-}
+import { COLLECTION_SLUGS } from '../constants/defaults.js'
 
 export class CategoryRepository {
   constructor(private readonly payload: Payload) {}
@@ -21,7 +12,7 @@ export class CategoryRepository {
     locale?: string
     sort?: string
     where?: Record<string, any>
-  }): Promise<CategoryDocument[]> {
+  }): Promise<Category[]> {
     try {
       const result = await this.payload.find({
         collection: COLLECTION_SLUGS.CATEGORIES,
@@ -31,8 +22,7 @@ export class CategoryRepository {
         sort: options?.sort || 'name',
         where: options?.where,
       })
-
-      return result.docs as CategoryDocument[]
+      return result.docs as unknown as Category[]
     } catch (error) {
       throw new Error(
         `Failed to fetch categories: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -40,7 +30,7 @@ export class CategoryRepository {
     }
   }
 
-  async findById(id: string, locale?: string): Promise<CategoryDocument | null> {
+  async findById(id: string, locale?: string): Promise<Category | null> {
     try {
       const result = await this.payload.findByID({
         id,
@@ -48,8 +38,7 @@ export class CategoryRepository {
         depth: 0,
         locale,
       })
-
-      return result as CategoryDocument
+      return result as unknown as Category
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         return null
@@ -60,14 +49,13 @@ export class CategoryRepository {
     }
   }
 
-  async findByName(name: string, locale?: string): Promise<CategoryDocument | null> {
+  async findByName(name: string, locale?: string): Promise<Category | null> {
     try {
       const result = await this.findAll({
         limit: 1,
         locale,
         where: { name: { equals: name } },
       })
-
       return result.length > 0 ? result[0] : null
     } catch (error) {
       throw new Error(
@@ -76,7 +64,7 @@ export class CategoryRepository {
     }
   }
 
-  async findEnabled(locale?: string): Promise<CategoryDocument[]> {
+  async findEnabled(locale?: string): Promise<Category[]> {
     return this.findAll({
       locale,
       where: { enabled: { equals: true } },
