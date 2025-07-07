@@ -36,6 +36,8 @@ export const ConsentEventRowLabel = () => {
     statusColor = '#d4b106'
   }
 
+  const revision = (data as any).revision
+
   return (
     <span style={{ alignItems: 'center', display: 'flex', gap: 12 }}>
       <span style={{ alignItems: 'center', color: statusColor, display: 'flex', fontWeight: 600 }}>
@@ -46,6 +48,11 @@ export const ConsentEventRowLabel = () => {
         <b>Categories:</b>{' '}
         {data.acceptedCategories.length ? data.acceptedCategories.join(', ') : 'None'}
       </span>
+      {revision !== undefined && (
+        <span style={{ color: '#888' }}>
+          <b>Revision:</b> {revision}
+        </span>
+      )}
     </span>
   )
 }
