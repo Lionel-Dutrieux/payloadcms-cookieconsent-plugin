@@ -4,15 +4,13 @@ import { Categories } from './collections/Categories.js'
 import { ConsentRecords } from './collections/ConsentRecords.js'
 import { consentEndpointHandler } from './endpoints/consentEndpointHandler.js'
 import { CookieConsentSettings } from './globals/CookieConsentSettings.js'
+import { seedCategories } from './seed/seedCategories.js'
 
 export * from './constants/defaults.js'
 // Export the service and constants for advanced usage
 export { CookieConsentConfigMapper } from './data/CookieConsentConfigMapper.js'
 
 export type PayloadcmsCookieconsentPluginConfig = {
-  /**
-   * List of collections to add a custom field
-   */
   collections?: Partial<Record<CollectionSlug, true>>
   disabled?: boolean
 }
@@ -57,7 +55,8 @@ export const payloadcmsCookieconsentPlugin =
         await incomingOnInit(payload)
       }
 
-      payload.logger.info('Hello from the plugin')
+      payload.logger.info('Seeding categories')
+      await seedCategories(payload)
     }
 
     return config

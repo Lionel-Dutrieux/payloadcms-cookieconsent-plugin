@@ -1,4 +1,14 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeDeleteHook, CollectionConfig } from 'payload'
+
+const PROTECTED_CATEGORY_NAMES = ['necessary', 'marketing', 'analytics'] as const
+
+const preventProtectedDelete: CollectionBeforeDeleteHook = async ({ id, req }) => {
+  // Find the document by id to check its name
+  const doc = await req.payload.findByID({ id, collection: 'categories' })
+  if (doc && PROTECTED_CATEGORY_NAMES.includes(doc.name)) {
+    throw new Error(`Cannot delete protected category: ${doc.name}`)
+  }
+}
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -84,6 +94,9 @@ export const Categories: CollectionConfig = {
       label: '⚙️ Category Settings',
     },
   ],
+  hooks: {
+    beforeDelete: [preventProtectedDelete],
+  },
   versions: {
     drafts: true,
   },
