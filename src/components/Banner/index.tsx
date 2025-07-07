@@ -27,12 +27,14 @@ export const CookieConsentBanner = ({ config }: CookieConsentBannerProps) => {
 const logConsent = (action: 'granted' | 'modified' | 'renewed' | 'withdrawn') => {
   const cookie = CookieConsent.getCookie()
   const preferences = CookieConsent.getUserPreferences()
+  const revision = CookieConsent.getConfig('revision')
 
   const event = {
     acceptedCategories: preferences.acceptedCategories,
     acceptType: preferences.acceptType,
     action,
     rejectedCategories: preferences.rejectedCategories,
+    revision, // add revision to event
     // userAgent and ipAddress are set server-side
   }
 

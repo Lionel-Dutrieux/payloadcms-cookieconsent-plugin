@@ -129,6 +129,13 @@ export const ConsentRecords: CollectionConfig = {
           label: 'IP Address (anonymized)',
           required: false,
         },
+        {
+          name: 'revision',
+          type: 'number',
+          admin: { readOnly: true },
+          label: 'Revision',
+          required: false,
+        },
       ],
       label: 'Consent Events History',
       minRows: 1,

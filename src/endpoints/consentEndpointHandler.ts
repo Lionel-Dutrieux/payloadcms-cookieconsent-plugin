@@ -10,6 +10,7 @@ const ConsentEventSchema = z.object({
   acceptType: z.string(),
   action: z.enum(['granted', 'modified', 'withdrawn', 'renewed']),
   rejectedCategories: z.array(z.string()).optional(),
+  revision: z.number().optional(),
   // timestamp, userAgent and ipAddress are set server-side
 })
 

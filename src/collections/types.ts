@@ -12,6 +12,7 @@ export interface ConsentEvent {
   action: 'granted' | 'modified' | 'renewed' | 'withdrawn'
   ipAddress?: string
   rejectedCategories?: string[]
+  revision?: number
   timestamp: string
   userAgent?: string
 }
