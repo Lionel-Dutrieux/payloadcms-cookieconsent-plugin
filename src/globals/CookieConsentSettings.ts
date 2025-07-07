@@ -76,11 +76,11 @@ export const CookieConsentSettings: GlobalConfig = {
               type: 'number',
               admin: {
                 description:
-                  '⚠️ Auto-increments when you publish changes. This forces users to re-accept consent. Make sure to update your privacy policy and cookie information before publishing!',
-                readOnly: true,
+                  'Manually increment this number to force all users to re-accept consent. When you change your cookie policy or scripts, increase this value to retrigger the cookie banner for everyone. (Cookie Consent v3 behavior)',
+                // readOnly: true, // Removed to allow manual editing
               },
               defaultValue: 0,
-              label: 'Consent Revision (Auto-increment)',
+              label: 'Consent Revision (Manual)',
               min: 0,
             },
             // Cookie Settings
@@ -521,18 +521,6 @@ export const CookieConsentSettings: GlobalConfig = {
       ],
     },
   ],
-  hooks: {
-    beforeChange: [
-      ({ data, req }) => {
-        // Auto-increment revision on publish (not on draft saves)
-        if (req.data && req.data._status !== 'draft') {
-          // Only increment if not saving as draft
-          data.revision = (data.revision || 0) + 1
-        }
-        return data
-      },
-    ],
-  },
   label: 'Settings',
   versions: {
     drafts: true,
