@@ -1,218 +1,179 @@
-# Payload Plugin Template
+# Payload CMS Cookie Consent Plugin
 
-A template repo to create a [Payload CMS](https://payloadcms.com) plugin.
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/your-repo/payloadcms-cookieconsent-plugin/blob/main/LICENSE)
 
-Payload is built with a robust infrastructure intended to support Plugins with ease. This provides a simple, modular, and reusable way for developers to extend the core capabilities of Payload.
+A powerful, self-hosted cookie consent solution for [Payload CMS](https://payloadcms.com/). This plugin provides a complete system for managing cookie and script consent on your website, ensuring compliance with privacy regulations without relying on external services like Cookiebot.
 
-To build your own Payload plugin, all you need is:
+## Features
 
-- An understanding of the basic Payload concepts
-- And some JavaScript/Typescript experience
+- **Self-Hosted & Independent**: No external dependencies on third-party services. Keep all your data in-house.
+- **Granular Consent Management**: Define script categories (e.g., necessary, marketing, analytics) and let users choose what they consent to.
+- **Payload-Native UI**: Manage all settings directly from your Payload admin panel.
+- **Developer Friendly**: Easy to configure and integrate into your Payload project.
+- **Customizable Banner**: The consent banner can be styled to match your website's design.
+- **Consent Logging**: Keep a record of user consent choices.
+- **Multi-language support**: Integrates with Payload's localization to display the banner in the user's language.
 
-## Background
+## Installation
 
-Here is a short recap on how to integrate plugins with Payload, to learn more visit the [plugin overview page](https://payloadcms.com/docs/plugins/overview).
+```bash
+pnpm install payloadcms-cookieconsent-plugin
+```
 
-### How to install a plugin
+## How to Use
 
-To install any plugin, simply add it to your payload.config() in the Plugin array.
+### 1. Add the Plugin to Your Payload Config
 
-```ts
-import myPlugin from 'my-plugin'
+In your `payload.config.ts` file, import and add the plugin to the `plugins` array.
 
-export const config = buildConfig({
+```typescript
+// payload.config.ts
+import { buildConfig } from 'payload/config';
+import { payloadcmsCookieconsentPlugin } from 'payloadcms-cookieconsent-plugin';
+
+export default buildConfig({
+  // ... your other config
   plugins: [
-    // You can pass options to the plugin
-    myPlugin({
-      enabled: true,
+    payloadcmsCookieconsentPlugin({
+      // Plugin options go here
     }),
   ],
-})
+});
 ```
 
-### Initialization
+### 2. Add the Provider to Your Layout
 
-The initialization process goes in the following order:
+To display the cookie consent banner and inject scripts based on user consent, you need to add the `CookieConsentProvider` to your website's layout. This is typically done in your root `layout.tsx` file.
 
-1. Incoming config is validated
-2. **Plugins execute**
-3. Default options are integrated
-4. Sanitization cleans and validates data
-5. Final config gets initialized
+```typescript
+// app/layout.tsx
+import React from 'react';
+import { CookieConsentProvider } from 'payloadcms-cookieconsent-plugin/rsc';
+import { getPayload } from 'payload';
+import configPromise from '@payload-config';
 
-## Building the Plugin
+type Args = {
+  children: React.ReactNode;
+};
 
-When you build a plugin, you are purely building a feature for your project and then abstracting it outside of the project.
+const Layout = async ({ children }: Args) => {
+  const payload = await getPayload({ config: configPromise });
 
-### Template Files
+  return (
+    <html>
+      <body>
+        {children}
+        <CookieConsentProvider payload={payload} locale='en' />
+      </body>
+    </html>
+  );
+};
 
-In the Payload [plugin template](https://github.com/payloadcms/payload/tree/main/templates/plugin), you will see a common file structure that is used across all plugins:
-
-1. root folder
-2. /src folder
-3. /dev folder
-
-#### Root
-
-In the root folder, you will see various files that relate to the configuration of the plugin. We set up our environment in a similar manner in Payload core and across other projects, so hopefully these will look familiar:
-
-- **README**.md\* - This contains instructions on how to use the template. When you are ready, update this to contain instructions on how to use your Plugin.
-- **package**.json\* - Contains necessary scripts and dependencies. Overwrite the metadata in this file to describe your Plugin.
-- .**eslint**.config.js - Eslint configuration for reporting on problematic patterns.
-- .**gitignore** - List specific untracked files to omit from Git.
-- .**prettierrc**.json - Configuration for Prettier code formatting.
-- **tsconfig**.json - Configures the compiler options for TypeScript
-- .**swcrc** - Configuration for SWC, a fast compiler that transpiles and bundles TypeScript.
-- **vitest**.config.js - Config file for Vitest, defining how tests are run and how modules are resolved
-
-**IMPORTANT\***: You will need to modify these files.
-
-#### Dev
-
-In the dev folder, you’ll find a basic payload project, created with `npx create-payload-app` and the blank template.
-
-**IMPORTANT**: Make a copy of the `.env.example` file and rename it to `.env`. Update the `DATABASE_URI` to match the database you are using and your plugin name. Update `PAYLOAD_SECRET` to a unique string.
-**You will not be able to run `pnpm/yarn dev` until you have created this `.env` file.**
-
-`myPlugin` has already been added to the `payload.config()` file in this project.
-
-```ts
-plugins: [
-  myPlugin({
-    collections: {
-      posts: true,
-    },
-  }),
-]
+export default Layout;
 ```
 
-Later when you rename the plugin or add additional options, **make sure to update it here**.
+### 3. Configure Scripts in the Payload Admin
 
-You may wish to add collections or expand the test project depending on the purpose of your plugin. Just make sure to keep this dev environment as simplified as possible - users should be able to install your plugin without additional configuration required.
+After installing the plugin, you will find a new "Cookie Consent Settings" global in your Payload admin panel. Here you can:
 
-When you’re ready to start development, initiate the project with `pnpm/npm/yarn dev` and pull up [http://localhost:3000](http://localhost:3000) in your browser.
+- **Enable/Disable the consent banner.**
+- **Customize the banner text and buttons.**
+- **Add and categorize scripts.**
 
-#### Src
+When adding a script, you can choose from the following categories, which are seeded by default:
 
-Now that we have our environment setup and we have a dev project ready to - it’s time to build the plugin!
+- **Necessary**: Essential scripts that are always loaded.
+- **Marketing**: Scripts for marketing and advertising purposes.
+- **Analytics**: Scripts for analytics and tracking.
 
-**index.ts**
+For each script, you can specify its content (e.g., a Google Analytics snippet) and where it should be placed (head or body).
 
-The essence of a Payload plugin is simply to extend the payload config - and that is exactly what we are doing in this file.
+### 4. Add Scripts Directly in Your Project (Alternative)
 
-```ts
-export const myPlugin =
-  (pluginOptions: MyPluginConfig) =>
-  (config: Config): Config => {
-    // do cool stuff with the config here
+For scripts that are an integral part of your application, you can embed them directly using the `ConsentScript` component. This is useful for scripts that you manage within your codebase rather than in the Payload admin panel.
 
-    return config
-  }
+The component ensures that the script is only rendered if the user has given consent for the specified category.
+
+```typescript
+// app/MyComponent.tsx
+import { ConsentScript } from 'payloadcms-cookieconsent-plugin/rsc';
+
+const MyComponent = () => {
+  return (
+    <div>
+      {/* Other component content */}
+      <ConsentScript category="analytics" service="Google Analytics">
+        {`
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-XXXXX-Y', 'auto');
+          ga('send', 'pageview');
+        `}
+      </ConsentScript>
+    </div>
+  );
+};
+
+export default MyComponent;
 ```
 
-First, we receive the existing payload config along with any plugin options.
+**Props:**
 
-From here, you can extend the config as you wish.
+*   `category`: (Required) The consent category for the script. Can be `necessary`, `analytics`, or `marketing`. The script will only be injected if consent is given for this category.
+*   `service`: (Optional) The name of the service the script belongs to (e.g., "Google Analytics", "Facebook Pixel"). If provided, this name will be displayed in the cookie consent banner, allowing users to see which services are used in each category.
 
-Finally, you return the config and that is it!
+This approach provides a clear and maintainable way to manage consent for scripts that are tightly coupled with your application's code.
 
-##### Spread Syntax
+## Roadmap
 
-Spread syntax (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
+- [ ] More banner customization options from the admin panel.
+- [ ] Support for more script placement options.
+- [ ] Detailed documentation on advanced customization.
+- [ ] Theming options for the consent banner.
 
-We are going to use spread syntax to allow us to add data to existing arrays without losing the existing data. It is crucial to spread the existing data correctly – else this can cause adverse behavior and conflicts with Payload config and other plugins.
+## GDPR, Consent Logging, and Data Privacy
 
-Let’s say you want to build a plugin that adds a new collection:
+This plugin helps you comply with GDPR and other privacy regulations by managing user consent for cookies and scripts. Here’s what you need to know:
 
-```ts
-config.collections = [
-  ...(config.collections || []),
-  // Add additional collections here
-]
-```
+### Free to Use, Manual Management
 
-First we spread the `config.collections` to ensure that we don’t lose the existing collections, then you can add any additional collections just as you would in a regular payload config.
+This plugin is completely free to use. However, it's important to understand that it does not automatically detect scripts on your website. You are responsible for manually adding and categorizing all scripts through the Payload admin panel or by using the `<ConsentScript>` component in your code.
 
-This same logic is applied to other properties like admin, hooks, globals:
+This is a key difference from services like Cookiebot, which automatically scan your site and block scripts. With this plugin, you have full control, but you must be diligent in ensuring all non-essential scripts are correctly configured to respect user consent.
 
-```ts
-config.globals = [
-  ...(config.globals || []),
-  // Add additional globals here
-]
+### What is Logged?
 
-config.hooks = {
-  ...(incomingConfig.hooks || {}),
-  // Add additional hooks here
-}
-```
+When a user makes a choice in the consent banner, a record is created in the "Consent Records" collection in your Payload database. For each consent action, the following information is stored:
 
-Some properties will be slightly different to extend, for instance the onInit property:
+*   **Consent ID**: A unique identifier for the user's consent session, stored in a cookie.
+*   **User**: If the user is logged in, their user ID is associated with the consent record.
+*   **Timestamp**: The date and time of the consent action.
+*   **Action**: The type of action (e.g., granted, modified, withdrawn).
+*   **Accepted & Rejected Categories**: Which script categories the user consented to or rejected.
+*   **User Agent**: The user's browser information.
+*   **IP Address**: The user's IP address is stored in an anonymized format.
+*   **Revision**: A number that tracks changes to the consent settings.
 
-```ts
-import { onInitExtension } from './onInitExtension' // example file
+This log provides a verifiable audit trail of consent, which is a key requirement of the GDPR.
 
-config.onInit = async (payload) => {
-  if (incomingConfig.onInit) await incomingConfig.onInit(payload)
-  // Add additional onInit code by defining an onInitExtension function
-  onInitExtension(pluginOptions, payload)
-}
-```
+### GDPR Compliance
 
-If you wish to add to the onInit, you must include the **async/await**. We don’t use spread syntax in this case, instead you must await the existing `onInit` before running additional functionality.
+While this plugin provides the tools to be GDPR compliant, compliance is ultimately your responsibility. Here are a few key points:
 
-In the template, we have stubbed out some addition `onInit` actions that seeds in a document to the `plugin-collection`, you can use this as a base point to add more actions - and if not needed, feel free to delete it.
+*   **Lawful Basis for Processing**: You must have a lawful basis for processing user data. For non-essential scripts, that basis is consent.
+*   **Informed Consent**: Users must be clearly informed about what they are consenting to. Use the banner text and service descriptions to explain why you are using certain scripts.
+*   **Right to Withdraw**: Users can change their consent settings at any time. The plugin handles this by allowing users to re-open the consent banner.
+*   **Data Minimization**: Only collect the data you need. This plugin anonymizes IP addresses to help with this.
 
-##### Types.ts
+By using this plugin correctly and being transparent with your users, you can build a privacy-friendly website that respects user choice.
 
-If your plugin has options, you should define and provide types for these options.
+## Contributing
 
-```ts
-export type MyPluginConfig = {
-  /**
-   * List of collections to add a custom field
-   */
-  collections?: Partial<Record<CollectionSlug, true>>
-  /**
-   * Disable the plugin
-   */
-  disabled?: boolean
-}
-```
+Contributions are welcome! Please feel free to submit a pull request or open an issue.
 
-If possible, include JSDoc comments to describe the options and their types. This allows a developer to see details about the options in their editor.
+## License
 
-##### Testing
-
-Having a test suite for your plugin is essential to ensure quality and stability. **Vitest** is a fast, modern testing framework that works seamlessly with Vite and supports TypeScript out of the box.
-
-Vitest organizes tests into test suites and cases, similar to other testing frameworks. We recommend creating individual tests based on the expected behavior of your plugin from start to finish.
-
-Writing tests with Vitest is very straightforward, and you can learn more about how it works in the [Vitest documentation.](https://vitest.dev/)
-
-For this template, we stubbed out `int.spec.ts` in the `dev` folder where you can write your tests.
-
-```ts
-describe('Plugin tests', () => {
-  // Create tests to ensure expected behavior from the plugin
-  it('some condition that must be met', () => {
-   // Write your test logic here
-   expect(...)
-  })
-})
-```
-
-## Best practices
-
-With this tutorial and the plugin template, you should have everything you need to start building your own plugin.
-In addition to the setup, here are other best practices aim we follow:
-
-- **Providing an enable / disable option:** For a better user experience, provide a way to disable the plugin without uninstalling it. This is especially important if your plugin adds additional webpack aliases, this will allow you to still let the webpack run to prevent errors.
-- **Include tests in your GitHub CI workflow**: If you’ve configured tests for your package, integrate them into your workflow to run the tests each time you commit to the plugin repository. Learn more about [how to configure tests into your GitHub CI workflow.](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs)
-- **Publish your finished plugin to NPM**: The best way to share and allow others to use your plugin once it is complete is to publish an NPM package. This process is straightforward and well documented, find out more [creating and publishing a NPM package here.](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
-- **Add payload-plugin topic tag**: Apply the tag **payload-plugin **to your GitHub repository. This will boost the visibility of your plugin and ensure it gets listed with [existing payload plugins](https://github.com/topics/payload-plugin).
-- **Use [Semantic Versioning](https://semver.org/) (SemVar)** - With the SemVar system you release version numbers that reflect the nature of changes (major, minor, patch). Ensure all major versions reference their Payload compatibility.
-
-# Questions
-
-Please contact [Payload](mailto:dev@payloadcms.com) with any questions about using this plugin template.
+This project is licensed under the MIT License.
