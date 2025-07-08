@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { Suspense } from 'react'
 
 import { CookieConsentBanner } from '../components/Banner/index.js'
-import { CookieScriptManager } from '../components/ScriptManager/index.js'
+import { ScriptsInjector } from '../components/ScriptsInjector/index.js'
 import { ERROR_MESSAGES } from '../constants/defaults.js'
 import { CategoryRepository } from '../data/CategoryRepository.js'
 import { CookieConsentConfigMapper } from '../data/CookieConsentConfigMapper.js'
@@ -38,17 +38,6 @@ interface CookieConsentContentProps {
 }
 
 /**
- * Error boundary component for cookie consent
- */
-const CookieConsentErrorFallback = ({ error }: { error: Error }) => {
-  console.error('Cookie consent initialization error:', error)
-
-  // Return null to gracefully degrade when cookie consent fails
-  // The main application will still work
-  return null
-}
-
-/**
  * Loading component while fetching data
  */
 const CookieConsentLoading = () => {
@@ -77,7 +66,7 @@ const CookieConsentContent = async ({
     return (
       <>
         <CookieConsentBanner config={config} />
-        <CookieScriptManager scripts={scripts} />
+        <ScriptsInjector scripts={scripts} />
       </>
     )
   } catch (error) {
@@ -86,12 +75,7 @@ const CookieConsentContent = async ({
       error instanceof Error ? error.message : ERROR_MESSAGES.INVALID_CONFIGURATION
     console.error('Failed to initialize cookie consent:', errorMessage)
 
-    // Return the error fallback component
-    return (
-      <CookieConsentErrorFallback
-        error={error instanceof Error ? error : new Error(errorMessage)}
-      />
-    )
+    return null
   }
 }
 

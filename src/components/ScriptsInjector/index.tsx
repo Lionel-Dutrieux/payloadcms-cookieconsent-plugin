@@ -1,10 +1,10 @@
 import type { Script } from '../../globals/types.js'
 
-interface CookieScriptManagerProps {
+interface ScriptsInjectorProps {
   scripts: Script[]
 }
 
-export const CookieScriptManager = ({ scripts }: CookieScriptManagerProps) => {
+export const ScriptsInjector = ({ scripts }: ScriptsInjectorProps) => {
   const enabledScripts = scripts.filter((script) => script.enabled)
 
   return (
