@@ -130,6 +130,31 @@ To add scripts that respect user consent, simply use native script tags with the
 
 For more examples and advanced options, see the [official CookieConsent v3 documentation](https://cookieconsent.orestbida.com/advanced/manage-scripts.html).
 
+## 5. Using Custom Attributes to Control the Consent Banner
+
+CookieConsent v3 provides a convenient way to control the consent banner and modals using custom HTML attributes, without writing any JavaScript. You can use the `data-cc` attribute on any button or link to trigger core consent actions.
+
+**Examples:**
+
+```html
+<!-- Open the preferences modal -->
+<button type="button" data-cc="show-preferencesModal">Manage cookie preferences</button>
+
+<!-- Open the consent modal -->
+<button type="button" data-cc="show-consentModal">Show consent banner</button>
+
+<!-- Accept all categories -->
+<button type="button" data-cc="accept-all">Accept all cookies</button>
+
+<!-- Accept only necessary categories -->
+<button type="button" data-cc="accept-necessary">Accept only necessary</button>
+
+<!-- Accept the current selection in the preferences modal -->
+<button type="button" data-cc="accept-custom">Accept selection</button>
+```
+
+For a full list of available actions and more details, see the [CookieConsent v3 Custom Attribute documentation](https://cookieconsent.orestbida.com/advanced/custom-attribute.html).
+
 ## Roadmap
 
 - [ ] More banner customization options from the admin panel.
