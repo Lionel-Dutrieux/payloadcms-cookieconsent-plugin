@@ -1,5 +1,3 @@
-import { ConsentScript } from 'payloadcms-cookieconsent-plugin/rsc'
-
 export default function Page() {
   return (
     <>
@@ -7,9 +5,6 @@ export default function Page() {
       <button data-cc="show-preferencesModal" type="button">
         Manage cookie preferences
       </button>
-      <ConsentScript category="necessary" service="Test">
-        alert('Hello World')
-      </ConsentScript>
     </>
   )
 }

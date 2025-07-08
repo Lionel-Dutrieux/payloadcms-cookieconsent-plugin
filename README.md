@@ -2,7 +2,18 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/your-repo/payloadcms-cookieconsent-plugin/blob/main/LICENSE)
 
-A powerful, self-hosted cookie consent solution for [Payload CMS](https://payloadcms.com/). This plugin provides a complete system for managing cookie and script consent on your website, ensuring compliance with privacy regulations without relying on external services like Cookiebot.
+---
+
+**About this plugin**
+
+This plugin combines the power of [CookieConsent v3](https://cookieconsent.orestbida.com/) for frontend consent management with [Payload CMS](https://payloadcms.com/) for backend configuration and consent logging. 
+
+- **Frontend:** Uses CookieConsent v3 under the hood to display the consent banner, manage user choices, and block/unblock scripts according to user consent. All script blocking and consent UI logic is handled by CookieConsent v3, a robust and widely adopted open-source solution.
+- **Backend:** Leverages Payload CMS to provide an admin UI for configuring categories, scripts, and banner content, and to log user consent actions for compliance (e.g., GDPR).
+
+With this approach, you get a modern, customizable, and self-hosted cookie consent solution that is easy to manage and fully compliant.
+
+---
 
 ## Features
 
@@ -88,44 +99,36 @@ When adding a script, you can choose from the following categories, which are se
 
 For each script, you can specify its content (e.g., a Google Analytics snippet) and where it should be placed (head or body).
 
-### 4. Add Scripts Directly in Your Project (Alternative)
+## 4. Adding Scripts Requiring Consent
 
-For scripts that are an integral part of your application, you can embed them directly using the `ConsentScript` component. This is useful for scripts that you manage within your codebase rather than in the Payload admin panel.
+To add scripts that respect user consent, simply use native script tags with the correct attributes, as recommended by [CookieConsent v3](https://cookieconsent.orestbida.com/advanced/manage-scripts.html):
 
-The component ensures that the script is only rendered if the user has given consent for the specified category.
+```html
+<!-- Analytics script blocked until the user has given consent -->
+<script
+  type="text/plain"
+  data-category="analytics"
+  data-service="Google Analytics"
+  src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXX-Y"
+></script>
 
-```typescript
-// app/MyComponent.tsx
-import { ConsentScript } from 'payloadcms-cookieconsent-plugin/rsc';
+<!-- Inline marketing script -->
+<script type="text/plain" data-category="marketing">
+  // Your marketing code here
+</script>
 
-const MyComponent = () => {
-  return (
-    <div>
-      {/* Other component content */}
-      <ConsentScript category="analytics" service="Google Analytics">
-        {`
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-          ga('create', 'UA-XXXXX-Y', 'auto');
-          ga('send', 'pageview');
-        `}
-      </ConsentScript>
-    </div>
-  );
-};
-
-export default MyComponent;
+<!-- Necessary script (always loaded) -->
+<script data-category="necessary">
+  // Your necessary code here
+</script>
 ```
 
-**Props:**
+- `type="text/plain"` blocks execution until the user has given consent.
+- `data-category` specifies the consent category ("necessary", "analytics", "marketing", etc.).
+- `data-service` (optional) specifies the service (e.g., "Google Analytics").
+- Use `src` for external scripts or inline content as needed.
 
-*   `category`: (Required) The consent category for the script. Can be `necessary`, `analytics`, or `marketing`. The script will only be injected if consent is given for this category.
-*   `service`: (Optional) The name of the service the script belongs to (e.g., "Google Analytics", "Facebook Pixel"). If provided, this name will be displayed in the cookie consent banner, allowing users to see which services are used in each category.
-
-This approach provides a clear and maintainable way to manage consent for scripts that are tightly coupled with your application's code.
+For more examples and advanced options, see the [official CookieConsent v3 documentation](https://cookieconsent.orestbida.com/advanced/manage-scripts.html).
 
 ## Roadmap
 
