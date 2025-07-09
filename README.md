@@ -1,3 +1,11 @@
+# ⚠️ Project Status: Proof of Concept (POC)
+
+**This project is a proof of concept (POC) and is _not_ a maintained plugin.**
+
+While it may be useful for others exploring cookie consent solutions with Payload CMS and Next.js, please note that it is not production-ready or actively maintained. I'm new to both Next.js and Payload CMS—feedback, contributions, pull requests, and advice on architecture or technology choices are very welcome!
+
+---
+
 # Payload CMS Cookie Consent Plugin
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/your-repo/payloadcms-cookieconsent-plugin/blob/main/LICENSE)
@@ -154,13 +162,6 @@ CookieConsent v3 provides a convenient way to control the consent banner and mod
 ```
 
 For a full list of available actions and more details, see the [CookieConsent v3 Custom Attribute documentation](https://cookieconsent.orestbida.com/advanced/custom-attribute.html).
-
-## Roadmap
-
-- [ ] More banner customization options from the admin panel.
-- [ ] Support for more script placement options.
-- [ ] Detailed documentation on advanced customization.
-- [ ] Theming options for the consent banner.
 
 ## GDPR, Consent Logging, and Data Privacy
 
