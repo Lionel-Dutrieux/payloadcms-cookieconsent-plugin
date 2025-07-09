@@ -33,11 +33,6 @@ With this approach, you get a modern, customizable, and self-hosted cookie conse
 - **Consent Logging**: Keep a record of user consent choices.
 - **Multi-language support**: Integrates with Payload's localization to display the banner in the user's language.
 
-## Installation
-
-```bash
-pnpm install payloadcms-cookieconsent-plugin
-```
 
 ## How to Use
 
